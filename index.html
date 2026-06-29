@@ -651,10 +651,9 @@ function parseCSVStream(text) {
 }
 
 // ==========================================
-// 3. SEGREGATED PROCESSING & RENDER ENGINE
+// 3. DAILY LOG PROCESSING & RENDER ENGINE
 // ==========================================
 function processAndRenderMetrics(rows) {
-  // Setup safe default models to avoid structural missing links
   const weekData = Array.from({length: 21}, (_, i) => {
     const wkNum = i + 1;
     return {
@@ -663,124 +662,43 @@ function processAndRenderMetrics(rows) {
       phase: wkNum <= 6 ? "Phase 1 — Aerobic Build" : (wkNum <= 14 ? "Phase 2 — Hybrid Build" : (wkNum <= 19 ? "Phase 3 — HYROX Peak" : "Phase 4 — Taper")),
       plannedKm: plannedVolumes[i],
       actualKm: 0,
-      actualRaw: "0",
-      adherenceStr: "0%",
-      displayAdhPct: 0,
       isCurrentWeek: wkNum === 6,
-      lrStr: "—",
-      trackStr: "—",
-      notesStr: "—"
+      notesList: [],
+      hasTrack: false,
+      hasLongRun: false
     };
   });
 
-  const weeklySummaryRows = {};
-  const dailyLogRows = {};
-
-  // Sort rows cleanly into categories based on structural content markers
   rows.forEach((row) => {
-    if (!row || row.length < 1) return;
-    
-    const wkMatch = String(row[0]).match(/\d+/);
-    if (!wkMatch) return;
-    
-    const wkNum = parseInt(wkMatch[0]);
-    if (wkNum < 1 || wkNum > 21) return;
-    
-    const col1 = row[1] ? String(row[1]).trim() : "";
-    const col2 = row[2] ? String(row[2]).trim() : "";
-    
-    // Summary lines contain ranges ('–') or formal headers ('Phase')
-    const isWeeklySummary = col1.includes('–') || col2.toLowerCase().includes('phase');
-    
-    if (isWeeklySummary) {
-      if (!weeklySummaryRows[wkNum]) weeklySummaryRows[wkNum] = [];
-      weeklySummaryRows[wkNum].push(row);
-    } else {
-      if (!dailyLogRows[wkNum]) dailyLogRows[wkNum] = [];
-      dailyLogRows[wkNum].push(row);
+    if (!row || row.length < 2) return;
+
+    // Week column is Column B (Index 1)
+    const weekRaw = String(row[1]).trim();
+    const wkNum = parseInt(weekRaw);
+    if (isNaN(wkNum) || wkNum < 1 || wkNum > 21) return;
+
+    const currentWeekObj = weekData[wkNum - 1];
+
+    // Actual Distance run is Column G (Index 6)
+    if (row[6]) {
+      const actualRaw = String(row[6]).trim();
+      // Remove text tags or trailing alphanumeric metrics to block NaN corruptions
+      const cleanNum = parseFloat(actualRaw.replace(/[^0-9.]/g, ''));
+      if (!isNaN(cleanNum) && cleanNum > 0) {
+        currentWeekObj.actualKm += cleanNum;
+      }
+    }
+
+    const sessionType = row[3] ? String(row[3]).toLowerCase() : "";
+    const notesField = row[11] ? String(row[11]).trim() : "";
+
+    if (sessionType.includes("track")) currentWeekObj.hasTrack = true;
+    if (sessionType.includes("long")) currentWeekObj.hasLongRun = true;
+    if (notesField && notesField !== "—" && notesField.length > 2) {
+      currentWeekObj.notesList.push(notesField);
     }
   });
 
-  // Apply parsed matrix arrays back over visual layout cards
-  weekData.forEach((w) => {
-    const wkNum = w.weekNum;
-    let targetRows = [];
-    let hasSummaryRow = false;
-    
-    if (weeklySummaryRows[wkNum] && weeklySummaryRows[wkNum].length > 0) {
-      targetRows = weeklySummaryRows[wkNum];
-      hasSummaryRow = true;
-    } else if (dailyLogRows[wkNum] && dailyLogRows[wkNum].length > 0) {
-      targetRows = dailyLogRows[wkNum];
-    }
-    
-    if (targetRows.length === 0) return;
-
-    if (hasSummaryRow) {
-      // Configuration A: Master Weekly Summary format
-      const row = targetRows[targetRows.length - 1];
-      
-      if (row[1] && row[1].trim().includes('–')) w.dates = row[1].trim();
-      if (row[2] && row[2].trim().length > 3) w.phase = row[2].trim();
-      
-      // Target Column G (Index 6) for Actual KM run data
-      const rawActual = row[6] ? String(row[6]).trim() : "0";
-      let cleanActual = rawActual.replace(/[^0-9.]/g, '');
-      w.actualKm = parseFloat(cleanActual) || 0;
-      w.actualRaw = w.actualKm > 0 ? w.actualKm.toFixed(1) : rawActual;
-      
-      w.adherenceStr = row[7] ? String(row[7]).trim() : "";
-      w.lrStr = row[8] ? String(row[8]).trim() : "—";
-      w.trackStr = row[9] ? String(row[9]).trim() : "—";
-      w.notesStr = row[10] ? String(row[10]).trim() : "—";
-      
-      let cleanAdh = w.adherenceStr.replace(/[^0-9.]/g, '');
-      let parsedAdh = parseFloat(cleanAdh);
-      w.displayAdhPct = isNaN(parsedAdh) ? 0 : parsedAdh;
-    } else {
-      // Configuration B: Rolling Daily Log Format. Safely sum values to compute totals.
-      let aggregatedKm = 0;
-      let notesArray = [];
-      let lrMarkers = [];
-      let trackMarkers = [];
-      
-      targetRows.forEach((row) => {
-        // Read directly from Column G (Index 6)
-        if (row[6]) {
-          let cleanActual = String(row[6]).replace(/[^0-9.]/g, '');
-          aggregatedKm += parseFloat(cleanActual) || 0;
-        }
-        
-        let noteItem = row[10] || row[8] || "";
-        if (noteItem && noteItem.trim() !== "—" && noteItem.trim().length > 2) {
-          notesArray.push(noteItem.trim());
-        }
-        
-        let lrItem = row[7] || row[8] || "";
-        if (lrItem && (lrItem.includes("✓") || lrItem.includes("✗"))) {
-          lrMarkers.push(lrItem.trim());
-        }
-      });
-      
-      w.actualKm = aggregatedKm;
-      w.actualRaw = w.actualKm > 0 ? w.actualKm.toFixed(1) : "0";
-      
-      // Live math execution to prevent string parsing engine exceptions
-      w.displayAdhPct = Math.min(100, Math.round((w.actualKm / (w.plannedKm || 1)) * 100));
-      w.adherenceStr = `${w.displayAdhPct}%`;
-      
-      if (notesArray.length > 0) w.notesStr = [...new Set(notesArray)].join("; ");
-      if (lrMarkers.length > 0) w.lrStr = lrMarkers[lrMarkers.length - 1];
-    }
-    
-    // Handle the current in-progress validation rules cleanly
-    if (w.isCurrentWeek) {
-      w.displayAdhPct = Math.min(100, Math.round((w.actualKm / (w.plannedKm || 1)) * 100));
-      w.adherenceStr = `${w.displayAdhPct}%`;
-    }
-  });
-
-  // 4. Mathematical consolidation across global metrics
   let dynamicActuals = Array(21).fill(null);
   let totalKmCompleted = 0;
   let runningAdherenceAccumulator = 0;
@@ -798,21 +716,22 @@ function processAndRenderMetrics(rows) {
       p1CompletedKm += w.actualKm;
     }
 
-    if (!w.isCurrentWeek && w.actualKm > 0 && w.displayAdhPct > 0) {
-      runningAdherenceAccumulator += w.displayAdhPct;
+    const adherencePct = w.plannedKm > 0 ? Math.min(100, Math.round((w.actualKm / w.plannedKm) * 100)) : 0;
+
+    if (!w.isCurrentWeek && w.actualKm > 0) {
+      runningAdherenceAccumulator += adherencePct;
       countedAdherenceWeeks++;
     }
 
     let phaseClass = "t-p1";
-    if (w.phase.toLowerCase().includes("preload") || w.phase.toLowerCase().includes("preload")) phaseClass = "t-dl";
-    else if (w.phase.toLowerCase().includes("phase 2")) phaseClass = "t-p2";
+    if (deloadWeeks.includes(w.weekNum)) phaseClass = "t-dl";
+    else if (w.weekNum > 6 && w.weekNum <= 14) phaseClass = "t-p2";
 
     let adherenceClass = "t-good";
     if (w.isCurrentWeek) adherenceClass = "";
-    else if (w.displayAdhPct < 85) adherenceClass = "t-warn";
+    else if (adherencePct < 85) adherenceClass = "t-warn";
 
-    let lrClass = "t-good";
-    if (w.lrStr.includes("✗") || w.lrStr.startsWith("0 /")) lrClass = "t-crit";
+    const condensedNotes = w.notesList.length > 0 ? [...new Set(w.notesList)].join("; ") : "—";
 
     tableHtml += `
       <tr>
@@ -820,23 +739,22 @@ function processAndRenderMetrics(rows) {
         <td>${w.dates}</td>
         <td><span class="phase-tag ${phaseClass}">${w.phase}</span></td>
         <td>${w.plannedKm.toFixed(1)}</td>
-        <td><strong>${w.actualRaw}</strong></td>
+        <td><strong>${w.actualKm > 0 ? w.actualKm.toFixed(1) : '0.0'}</strong></td>
         <td>
           <div class="adh-bar">
             <div class="adh-track">
-              <div class="adh-fill" style="width: ${w.displayAdhPct}%; background:${w.isCurrentWeek ? '#7C3AED' : (adherenceClass === 't-warn' ? '#D97706' : '#15803D')}"></div>
+              <div class="adh-fill" style="width: ${adherencePct}%; background:${w.isCurrentWeek ? '#7C3AED' : (adherenceClass === 't-warn' ? '#D97706' : '#15803D')}"></div>
             </div>
-            <span class="${adherenceClass}" style="${w.isCurrentWeek ? 'color:#7C3AED; font-weight:600' : ''}">${w.adherenceStr}</span>
+            <span class="${adherenceClass}" style="${w.isCurrentWeek ? 'color:#7C3AED; font-weight:600' : ''}">${adherencePct}%</span>
           </div>
         </td>
-        <td><span class="${lrClass}">${w.lrStr}</span></td>
-        <td><span class="t-good">${w.trackStr}</span></td>
-        <td class="note-cell">${w.notesStr}</td>
+        <td><span>${w.hasLongRun ? '✓ Completed' : '—'}</span></td>
+        <td><span>${w.hasTrack ? '✓ Completed' : '—'}</span></td>
+        <td class="note-cell">${condensedNotes}</td>
       </tr>
     `;
   });
 
-  // Final rendering injection phase
   volChartInstance.data.datasets[0].data = dynamicActuals;
   volChartInstance.update();
 
