@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Training Dashboard — Christian Avendano</title>
+<title>Christian Avendano — Training Dashboard 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -12,9 +12,10 @@
   --navy:#0F1F35;--navy2:#1E3A5F;--slate:#334155;--muted:#64748B;
   --border:#E2E8F0;--bg:#F1F5F9;--white:#fff;
   --p1:#1D6FA8;--p1bg:#EFF6FF;--p1border:#BFDBFE;
-  --good:#15803D;--goodbg:#F0FDF4;--goodborder:#BBF7D0;
-  --warn:#B45309;--warnbg:#FFF7ED;--warnborder:#FED7AA;
-  --info:#1D4ED8;--infobg:#EFF6FF;--infoborder:#BFDBFE;
+  --p2:#B45309;--p2bg:#FFFBEB;--p2border:#FDE68A;
+  --p3:#9F1239;--p3bg:#FFF1F2;--p3border:#FECDD3;
+  --p4:#15803D;--p4bg:#F0FDF4;--p4border:#BBF7D0;
+  --good:#15803D;--warn:#B45309;--crit:#DC2626;--neu:#334155;
   --font:'Inter',system-ui,sans-serif;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--navy);min-height:100vh;padding:0 0 3rem}
@@ -24,98 +25,141 @@ body{font-family:var(--font);background:var(--bg);color:var(--navy);min-height:1
 .topbar h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
 .topbar .sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:1px}
 .countdowns{display:flex;gap:12px;flex-wrap:wrap}
-.countdown-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;text-align:center}
+.countdown-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;text-align:center;min-width:80px}
 .countdown-chip .days{font-size:1.3rem;font-weight:700;line-height:1}
 .countdown-chip .label{font-size:.65rem;color:rgba(255,255,255,.6);margin-top:2px}
 .hyrox-chip{border-color:#FCD34D;background:rgba(252,211,77,.12)}
 .mara-chip{border-color:#6EE7B7;background:rgba(110,231,183,.1)}
 
-/* WRAPPER */
+/* REFRESH */
+.refresh-bar{background:var(--navy2);color:rgba(255,255,255,.7);font-size:.68rem;padding:5px 24px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.refresh-bar button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.68rem;font-family:var(--font)}
+.refresh-bar button:hover{background:rgba(255,255,255,.2)}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* WRAP */
 .wrap{max-width:1140px;margin:0 auto;padding:20px 16px}
 
-/* DEBUG / INSIGHTS BOX */
-#ai-insights-container {
-  background: #FFFBEB;
-  border: 1px solid #FDE68A;
-  color: #78350F;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-#ai-insights-container.error-state {
-  background: #FEF2F2;
-  border-color: #FCA5A5;
-  color: #991B1B;
-}
+/* ERROR BANNER */
+.error-banner{background:#FFF1F2;border:1px solid #FECDD3;color:#9F1239;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:.82rem;line-height:1.6;display:none}
+.error-banner strong{display:block;margin-bottom:4px}
+.error-banner code{background:#FCE7F3;padding:2px 6px;border-radius:4px;font-size:.75rem;word-break:break-all}
 
-/* ALERTS SYSTEM */
-.alert-row{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.alert-chip{border-radius:8px;padding:12px 16px;font-size:.82rem;display:flex;gap:10px;align-items:flex-start;border:1px solid;line-height:1.4}
-.a-good{background:var(--goodbg);border-color:var(--goodborder);color:#14532D}
-.a-warn{background:var(--warnbg);border-color:var(--warnborder);color:#92400E}
-.a-info{background:var(--infobg);border-color:var(--infoborder);color:#1D4ED8}
+/* LOADING SKELETON */
+.skeleton{background:linear-gradient(90deg,#E2E8F0 25%,#F1F5F9 50%,#E2E8F0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* METRICS GRID */
-.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.m-card{background:var(--white);border-radius:12px;padding:16px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between}
-.m-card .lbl{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.m-card .val{font-size:1.8rem;font-weight:800;color:var(--navy);margin:6px 0 2px}
-.m-card .sub-lbl{font-size:.75rem;color:var(--muted);margin-bottom:8px}
-.m-card .badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:600;width:fit-content}
-.b-good{background:#DCFCE7;color:#14532D}
-.b-warn{background:#FEF9C3;color:#713F12}
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.scard{background:var(--white);border-radius:12px;padding:14px 16px;border:1px solid var(--border)}
+.scard .lbl{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.scard .val{font-size:1.65rem;font-weight:700;color:var(--navy);line-height:1.1}
+.scard .sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.scard .badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:600;margin-top:4px}
+.bg{background:#DCFCE7;color:#14532D}.bw{background:#FEF9C3;color:#713F12}.br{background:#FEE2E2;color:#991B1B}.bp{background:#EDE9FE;color:#5B21B6}
+
+/* SECTION TITLES */
+.sec-title{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* CHART CARD */
 .chart-card{background:var(--white);border-radius:12px;padding:18px 20px;border:1px solid var(--border);margin-bottom:20px}
-.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .chart-title{font-size:.85rem;font-weight:600;color:var(--navy)}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-/* SNAPSHOT / SCHEDULE PANELS */
-.sec-title{font-size:.9rem;font-weight:700;color:var(--navy);margin:24px 0 12px;display:flex;align-items:center;gap:8px}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.week-panel{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px}
-.week-panel h3{font-size:.78rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.02em}
-.week-panel .date-range{font-size:1.05rem;font-weight:700;color:var(--navy);margin:2px 0 6px}
-.week-panel .target-summary{font-size:1.3rem;font-weight:800;color:var(--navy);margin-bottom:12px}
-.week-panel .target-summary span{font-size:.8rem;font-weight:400;color:var(--muted)}
-.day-row{display:flex;align-items:center;padding:5px 0;font-size:.82rem;border-bottom:1px solid #F8FAFC}
-.day-row:last-child{border-bottom:none}
-.day-dot{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;margin-right:10px;flex-shrink:0}
-.dot-m{background:#FEF3C7;color:#D97706}
-.dot-t{background:#FEF9C3;color:#CA8A04}
-.dot-w{background:#EFF6FF;color:#2563EB}
-.dot-th{background:#F1F5F9;color:#475569}
-.dot-f{background:#FCE7F3;color:#DB2777}
-.dot-sa{background:#E0F2FE;color:#0369A1}
-.dot-su{background:#F0FDF4;color:#16A34A}
-.day-text{color:var(--slate);line-height:1.3}
+/* PHASE CARDS */
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.pcard{background:var(--white);border-radius:12px;padding:14px 16px;border:1px solid var(--border);border-top:3px solid}
+.pcard h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.pcard .dates{font-size:.7rem;color:var(--muted);margin-bottom:10px}
+.pcard .km-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
+.pcard .km-val{font-weight:600}
+.progress-bar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.pcard .status{font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:6px;display:inline-block}
+.p1c{border-top-color:var(--p1)}.p2c{border-top-color:var(--p2)}.p3c{border-top-color:var(--p3)}.p4c{border-top-color:var(--p4)}
 
-@media(max-width:768px){
-  .metrics-grid, .schedule-grid{grid-template-columns:1fr}
+/* COMPLETED WEEKS TABLE */
+.table-card{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:20px;overflow:hidden}
+table{border-collapse:collapse;width:100%;font-size:.78rem}
+thead{background:var(--navy)}
+thead th{padding:9px 14px;text-align:left;font-size:.67rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F8FAFC}
+td{padding:9px 14px;vertical-align:middle}
+.week-num{font-weight:700;color:var(--navy)}
+.phase-tag{display:inline-block;padding:1px 7px;border-radius:6px;font-size:.65rem;font-weight:600}
+.t-p1{background:var(--p1bg);color:var(--p1)}.t-p2{background:var(--p2bg);color:var(--p2)}.t-p3{background:var(--p3bg);color:var(--p3)}.t-p4{background:var(--p4bg);color:var(--p4)}
+.t-dl{background:#F1F5F9;color:#475569}
+.adh-bar{display:flex;align-items:center;gap:6px}
+.adh-track{width:70px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.adh-fill{height:100%;border-radius:4px}
+.t-good{color:var(--good);font-weight:600}.t-warn{color:var(--warn);font-weight:600}.t-crit{color:var(--crit);font-weight:600}.t-prog{color:#7C3AED;font-weight:600}
+.note-cell{max-width:220px;font-size:.72rem;color:var(--muted);line-height:1.4}
+.curr-badge{display:inline-block;background:#7C3AED;color:#fff;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+
+/* KPI TABLE */
+.kpi-val-good{color:var(--good);font-weight:600}
+.kpi-val-warn{color:var(--warn);font-weight:600}
+.kpi-val-crit{color:var(--crit);font-weight:600}
+
+/* PROJECTIONS */
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.proj-card{background:var(--white);border-radius:12px;padding:18px 20px;border:1px solid var(--border)}
+.proj-card h3{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.proj-card .sub{font-size:.72rem;color:var(--muted);margin-bottom:14px}
+.scenario-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F1F5F9}
+.scenario-row:last-child{border-bottom:none}
+.s-name{font-size:.75rem;font-weight:500;color:var(--slate)}
+.s-time{font-size:1rem;font-weight:700}
+.s-prob{font-size:.68rem;font-weight:500;padding:1px 6px;border-radius:6px}
+.dep-row{display:flex;gap:7px;align-items:flex-start;margin-top:7px;font-size:.72rem;color:var(--slate)}
+.dep-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+
+/* ALERT */
+.alert-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.alert-chip{border-radius:8px;padding:8px 12px;font-size:.75rem;flex:1;min-width:200px;display:flex;gap:7px;align-items:flex-start;border:1px solid}
+.a-good{background:#F0FDF4;border-color:#BBF7D0;color:#14532D}
+.a-warn{background:#FFF7ED;border-color:#FED7AA;color:#92400E}
+.a-info{background:#EFF6FF;border-color:#BFDBFE;color:#1D4ED8}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:32px;color:var(--muted);font-size:.82rem}
+
+@media(max-width:780px){
+  .summary-grid,.phase-grid{grid-template-columns:repeat(2,1fr)}
+  .proj-grid{grid-template-columns:1fr}
+  .topbar{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:480px){
+  .summary-grid,.phase-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 <body>
 
+<!-- TOP BAR -->
 <div class="topbar">
   <div>
-    <h1>Christian Avendano — Hybrid Performance Dashboard</h1>
-    <div class="sub">Dynamic Analytics Engine · Automated Integrity Check</div>
+    <h1>Christian Avendano — Hybrid Training Dashboard</h1>
+    <div class="sub" id="topbar-sub">Loading from Google Sheets…</div>
   </div>
   <div class="countdowns">
     <div class="countdown-chip hyrox-chip">
-      <div class="days" id="hyrox-countdown">-</div>
+      <div class="days" id="hyrox-days">—</div>
       <div class="label">days to HYROX</div>
     </div>
     <div class="countdown-chip">
       <div class="days">1:34:00</div>
-      <div class="label">Hyrox goal</div>
+      <div class="label">HYROX goal</div>
     </div>
     <div class="countdown-chip mara-chip">
-      <div class="days" id="marathon-countdown">-</div>
+      <div class="days" id="mara-days">—</div>
       <div class="label">days to marathon</div>
     </div>
     <div class="countdown-chip">
@@ -125,291 +169,591 @@ body{font-family:var(--font);background:var(--bg);color:var(--navy);min-height:1
   </div>
 </div>
 
-<div class="wrap">
-
-  <!-- Live Engine Diagnostics Window -->
-  <div id="ai-insights-container">
-    <strong id="insights-title">✨ System Status:</strong>
-    <span id="ai-insights-content">Connecting to streaming endpoint data channels...</span>
-  </div>
-
-  <!-- COACH METRIC STRIP -->
-  <div class="alert-row">
-    <div class="alert-chip a-good">✅ <div><strong>Z2 correction working</strong> — Both runs this week at HR 148–150 bpm. First true Z2 adherence in training block. Keep the pace at 6:20–6:35/km on easy days.</div></div>
-    <div class="alert-chip a-warn">⚠️ <div><strong>Week 2 long run still unrecovered</strong> — 18km LR missed entirely. Cumulative volume is on track, but long run consistency is critical. Don't miss another before Week 6 deload.</div></div>
-    <div class="alert-chip a-info">📅 <div><strong>Week 6 deload incoming (Jun 29)</strong> — Light S+C only. No stations. Long run caps at 14.5km. Use this to consolidate the Phase 1 aerobic work.</div></div>
-  </div>
-
-  <!-- STAT METRICS SNAPSHOT BLOCK -->
-  <div class="metrics-grid">
-    <div class="m-card">
-      <div class="lbl">Total KM Completed</div>
-      <div class="val" id="totalKmVal">0.0</div>
-      <div class="sub-lbl" id="plannedKmTarget">of 880.7km planned</div>
-      <div class="badge b-good" id="totalPctDone">0.0% done</div>
-    </div>
-    <div class="m-card">
-      <div class="lbl">Avg Weekly Adherence</div>
-      <div class="val" id="avgAdherenceVal">0%</div>
-      <div class="sub-lbl" id="adherenceWeeksLbl">Wks 1-4 cumulative</div>
-      <div class="badge b-good">On track</div>
-    </div>
-    <div class="m-card">
-      <div class="lbl">Long Run Adherence</div>
-      <div class="val" id="lrAdherenceVal">0%</div>
-      <div class="sub-lbl" id="lrRatioLbl">0 of 0 LRs completed</div>
-      <div class="badge b-warn" id="lrMissedFlag">No Misses Detonated</div>
-    </div>
-    <div class="m-card">
-      <div class="lbl">Phase 1 Completion</div>
-      <div class="val" id="phasePctVal">0%</div>
-      <div class="sub-lbl" id="phaseWeeksLbl">0 of 6 weeks done</div>
-      <div class="badge b-good">On schedule</div>
-    </div>
-  </div>
-
-  <!-- GRAPH PLOT CARD -->
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">Macrocycle Training Volume Profile</div>
-    </div>
-    <div style="position:relative;height:260px">
-      <canvas id="volChart"></canvas>
-    </div>
-  </div>
-
-  <!-- WEEKLY SNAPSHOT / KEY SESSIONS GENERATOR -->
-  <div class="sec-title">Upcoming Weeks — Key Sessions</div>
-  <div class="schedule-grid">
-    <div class="week-panel" id="panel-current">
-      <h3 id="curWeekHeader">Week 5 — Current</h3>
-      <div class="date-range" id="curDateRange">Processing...</div>
-      <div class="target-summary" id="curVolumeTarget">0.0 <span>km target</span></div>
-      <div id="curDaysBox"></div>
-    </div>
-    
-    <div class="week-panel" id="panel-next">
-      <h3 id="nextWeekHeader">Week 6 — Next Up</h3>
-      <div class="date-range" id="nextDateRange">Processing...</div>
-      <div class="target-summary" id="nextVolumeTarget">0.0 <span>km target</span></div>
-      <div id="nextDaysBox"></div>
-    </div>
-  </div>
-
+<!-- REFRESH BAR -->
+<div class="refresh-bar">
+  <span id="last-updated">Connecting to Google Sheets…</span>
+  <button onclick="loadAll(true)">↻ Refresh now</button>
 </div>
 
+<div class="wrap">
+
+<!-- ERROR BANNER -->
+<div class="error-banner" id="error-banner">
+  <strong>⚠️ Could not load data from Google Sheets</strong>
+  <span id="error-detail"></span><br><br>
+  Make sure your sheet is published to the web:<br>
+  <strong>File → Share → Publish to web → Entire Document → CSV → Publish</strong><br><br>
+  Your sheet ID: <code id="display-sheet-id"></code>
+</div>
+
+<!-- ALERTS (from Alerts sheet tab) -->
+<div id="alerts-container" class="alert-row"></div>
+
+<!-- SUMMARY CARDS -->
+<div class="summary-grid" id="summary-grid">
+  <div class="scard"><div class="lbl">Total km completed</div><div class="val skeleton" style="height:2rem;width:6rem;margin-bottom:4px">&nbsp;</div></div>
+  <div class="scard"><div class="lbl">Avg weekly adherence</div><div class="val skeleton" style="height:2rem;width:5rem;margin-bottom:4px">&nbsp;</div></div>
+  <div class="scard"><div class="lbl">Long run adherence</div><div class="val skeleton" style="height:2rem;width:5rem;margin-bottom:4px">&nbsp;</div></div>
+  <div class="scard"><div class="lbl">Phase 1 completion</div><div class="val skeleton" style="height:2rem;width:5rem;margin-bottom:4px">&nbsp;</div></div>
+</div>
+
+<!-- VOLUME CHART -->
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Weekly Running Volume — All 21 Weeks</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#1D6FA8"></div>Actual (completed)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#93C5FD"></div>Planned</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FCD34D"></div>Deload weeks</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FCA5A5"></div>Race weeks</div>
+    </div>
+  </div>
+  <div style="position:relative;height:280px">
+    <canvas id="volChart"></canvas>
+  </div>
+</div>
+
+<!-- PHASE PROGRESS -->
+<div class="sec-title">Phase Progress</div>
+<div class="phase-grid" id="phase-grid">
+  <!-- populated dynamically -->
+</div>
+
+<!-- COMPLETED WEEKS TABLE -->
+<div class="sec-title">Weekly Log</div>
+<div class="table-card">
+<table>
+  <thead>
+    <tr>
+      <th>Week</th><th>Dates</th><th>Phase</th>
+      <th>Planned km</th><th>Actual km</th><th>Adherence</th>
+      <th>Long Run</th><th>Track</th><th>Key notes</th>
+    </tr>
+  </thead>
+  <tbody id="weeks-tbody">
+    <tr><td colspan="9" class="empty-state">Loading weekly data…</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- KPI SNAPSHOT -->
+<div class="sec-title">Current KPI Snapshot</div>
+<div class="table-card">
+<table>
+  <thead>
+    <tr><th>KPI</th><th>Current</th><th>Phase 2 Target</th><th>Race-Ready Target</th><th>Trend</th><th>Source</th></tr>
+  </thead>
+  <tbody id="kpi-tbody">
+    <tr><td colspan="6" class="empty-state">Loading KPI data…</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- PROJECTIONS — static (goals don't change based on data entry) -->
+<div class="sec-title">Race Projections — October 2026</div>
+<div class="proj-grid">
+  <div class="proj-card">
+    <h3>🏋️ HYROX Toronto — Oct 1–4</h3>
+    <div class="sub">Based on Ottawa 1:43:34 · Goal 1:34:00 · Gap: 9:34 needed</div>
+    <div class="scenario-row">
+      <span class="s-name">Optimistic</span>
+      <span class="s-time" style="color:var(--good)">1:33:00</span>
+      <span class="s-prob" style="background:#DCFCE7;color:#14532D">~30%</span>
+    </div>
+    <div class="scenario-row" style="background:#F8FAFF;border-radius:6px;padding:7px 6px">
+      <span class="s-name" style="font-weight:600">Realistic</span>
+      <span class="s-time" style="color:var(--p1)">1:35:30</span>
+      <span class="s-prob" style="background:#EFF6FF;color:#1D4ED8">~55%</span>
+    </div>
+    <div class="scenario-row">
+      <span class="s-name">Conservative</span>
+      <span class="s-time" style="color:var(--warn)">1:39:00</span>
+      <span class="s-prob" style="background:#FEF3C7;color:#92400E">~15%</span>
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px">Key dependencies</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--crit)"></div>Stations: need 4–5 min saved vs Ottawa (current top 89.5% weakness)</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--warn)"></div>Running: 5:15–5:25/km target (was 5:51/km in Ottawa)</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--good)"></div>Wall balls: 100 unbroken by Week 15 is the gating milestone</div>
+  </div>
+  <div class="proj-card">
+    <h3>🏃 TCS Waterfront Marathon — Oct 18</h3>
+    <div class="sub">Based on half 1:59:28 · Sep race sim 5:47/km · Post-Hyrox: 14–17 days</div>
+    <div class="scenario-row">
+      <span class="s-name">Stretch (sub-4)</span>
+      <span class="s-time" style="color:var(--good)">3:57–4:02</span>
+      <span class="s-prob" style="background:#DCFCE7;color:#14532D">~20%</span>
+    </div>
+    <div class="scenario-row" style="background:#F8FAFF;border-radius:6px;padding:7px 6px">
+      <span class="s-name" style="font-weight:600">Realistic</span>
+      <span class="s-time" style="color:var(--p1)">4:10–4:20</span>
+      <span class="s-prob" style="background:#EFF6FF;color:#1D4ED8">~60%</span>
+    </div>
+    <div class="scenario-row">
+      <span class="s-name">Conservative</span>
+      <span class="s-time" style="color:var(--warn)">4:25–4:35</span>
+      <span class="s-prob" style="background:#FEF3C7;color:#92400E">~20%</span>
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px">Key dependencies</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--crit)"></div>Post-Hyrox eccentric damage (sled, lunges, BBJ) — Phase 4 recovery quality</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--warn)"></div>Oct 12 confidence run: if 3km at 5:41/km feels easy → sub-4 is live</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--good)"></div>LR MP progression (32km with 14km @MP by Week 13) — fitness is there</div>
+  </div>
+</div>
+
+</div><!-- end wrap -->
+
 <script>
-const SHEET_ID = '1QUlfC3lCXqnpFMZhaeqUA9cJI0GTpXla';
-const API_KEY = 'AIzaSyDdTA-HVjzRtixRWz5apKOTSR2CD9xp4s4';
-const RANGE = 'Sheet1!A2:L200'; 
+// ─────────────────────────────────────────
+// CONFIGURATION — updated for your public tracking link
+// ─────────────────────────────────────────
+const SHEET_ID = '2PACX-1vSl2265IKCYyPylFPX1eSS0NvDEq6Rw3IdIY4iS2ZEXAoGgbZoe9p5TRLzZ-FDRCq5EbziGQk_C7G8I';
 
-const HYROX_DATE = new Date('October 3, 2026 00:00:00');
-const MARATHON_DATE = new Date('October 18, 2026 00:00:00');
-const dayClassMap = { 'Mon': 'dot-m', 'Tue': 'dot-t', 'Wed': 'dot-w', 'Thu': 'dot-th', 'Fri': 'dot-f', 'Sat': 'dot-sa', 'Sun': 'dot-su' };
+// Tab GIDs
+const TABS = {
+  weekly:  '422384441',  // Your "Weekly Log" published GID
+  kpi:     '',           // optional
+  alerts:  '',           // optional
+};
 
-function calculateCountdowns() {
+const HYROX_DATE = new Date('2026-10-01');
+const MARA_DATE  = new Date('2026-10-18');
+const DELOAD_WEEKS = [3,6,9,12,18];
+const RACE_WEEKS   = [19];
+
+// Phase definitions (static — mirrors your plan)
+const PHASES = [
+  { num:1, label:'Phase 1 — Aerobic Build',  color:'var(--p1)', bg:'var(--p1bg)', cls:'p1c', dates:'May 25 – Jul 5', weeks:'Weeks 1–6',  wStart:1,  wEnd:6,  total:257.8 },
+  { num:2, label:'Phase 2 — Hybrid Build',   color:'var(--p2)', bg:'var(--p2bg)', cls:'p2c', dates:'Jul 6 – Aug 30',  weeks:'Weeks 7–14', wStart:7,  wEnd:14, total:405.0 },
+  { num:3, label:'Phase 3 — HYROX Peak',     color:'var(--p3)', bg:'var(--p3bg)', cls:'p3c', dates:'Aug 31 – Oct 4',  weeks:'Weeks 15–19',wStart:15, wEnd:19, total:187.8 },
+  { num:4, label:'Phase 4 — Recovery Taper', color:'var(--p4)', bg:'var(--p4bg)', cls:'p4c', dates:'Oct 5–18',        weeks:'Weeks 20–21',wStart:20, wEnd:21, total:33.0  },
+];
+
+let volChart = null;
+document.getElementById('display-sheet-id').textContent = SHEET_ID;
+
+// ─────────────────────────────────────────
+// FETCH CSV FROM GOOGLE SHEETS
+// ─────────────────────────────────────────
+async function fetchCSV(gid) {
+  // Gracefully handles both direct spreadsheet IDs and 2PACX public web app hashes
+  let url;
+  if (SHEET_ID.startsWith('2PACX-')) {
+    url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${gid}&single=true&output=csv`;
+  } else {
+    url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+  }
+
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching gid=${gid}`);
+  const text = await res.text();
+  
+  if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+    throw new Error('Sheet returned HTML — double check publishing configuration layout.');
+  }
+  return parseCSV(text);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let current = '';
+  let inQuotes = false;
+  let row = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      if (inQuotes && text[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      row.push(current.trim()); current = '';
+    } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      if (ch === '\r' && text[i+1] === '\n') i++;
+      row.push(current.trim()); current = '';
+      if (row.some(c => c !== '')) rows.push(row);
+      row = [];
+    } else {
+      current += ch;
+    }
+  }
+  if (current || row.length) { row.push(current.trim()); if (row.some(c=>c!=='')) rows.push(row); }
+  return rows;
+}
+
+// ─────────────────────────────────────────
+// COUNTDOWNS
+// ─────────────────────────────────────────
+function updateCountdowns() {
   const today = new Date();
-  document.getElementById('hyrox-countdown').innerText = Math.ceil((HYROX_DATE - today) / (1000 * 60 * 60 * 24));
-  document.getElementById('marathon-countdown').innerText = Math.ceil((MARATHON_DATE - today) / (1000 * 60 * 60 * 24));
+  today.setHours(0,0,0,0);
+  const hd = Math.max(0, Math.ceil((HYROX_DATE - today) / 86400000));
+  const md = Math.max(0, Math.ceil((MARA_DATE  - today) / 86400000));
+  document.getElementById('hyrox-days').textContent = hd;
+  document.getElementById('mara-days').textContent  = md;
 }
 
-function cleanNumericValue(val) {
-  if (!val) return 0;
-  let s = val.toString().trim().replace(/[kmKM\s]/g, '');
-  if (s === "" || s === "-") return 0;
-  let parsed = parseFloat(s.split(/[a-zA-Z]/)[0]);
-  return isNaN(parsed) ? 0 : parsed;
-}
+// ─────────────────────────────────────────
+// MAPPING LAYOUT FROM GOOGLE SHEET DATA
+// ─────────────────────────────────────────
+const W = {
+  week:        0,
+  startDate:   1,
+  endDate:     2,
+  phase:       3,
+  type:        4,  
+  planned:     5,
+  actual:      6,
+  adherence:   7,  
+  lrActual:    8,
+  lrTarget:    9,
+  track:       10,
+  notes:       11,
+};
 
-function parseRowDate(dateStr) {
-  if (!dateStr) return null;
-  let cleanStr = dateStr.toString().trim().replace(/\//g, '-');
-  if (!cleanStr.startsWith("2026")) {
-    let parts = cleanStr.split("-");
-    if (parts.length >= 2 && parts[0].length < 4) {
-      cleanStr = `2026-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
-    }
-  }
-  let d = new Date(cleanStr + "T00:00:00");
-  return isNaN(d.getTime()) ? null : d;
-}
+function parseNum(v) { return parseFloat(String(v).replace(/[^0-9.]/g,'')) || 0; }
+function pct(v) { return parseFloat(String(v).replace('%','')) || 0; }
 
-async function loadDashboardData() {
-  try {
-    calculateCountdowns();
-    
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data.values || data.values.length === 0) {
-      showError("The API connected, but returned zero database rows. Check your worksheet tab name.");
-      return;
-    }
-
-    const weeklyMap = {};
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    let calculatedTotalCompleted = 0;
-    let totalPlannedMacro = 880.7; 
-    let longRunsPlanned = 0;
-    let longRunsDone = 0;
-    let week2WasMissed = false;
-
-    data.values.forEach(row => {
-      if (!row[1]) return; // Skip completely blank lines
-      
-      const weekNum = parseInt(row[1].toString().replace(/[^\d]/g, ''));
-      if (isNaN(weekNum)) return;
-
-      if (!weeklyMap[weekNum]) {
-        weeklyMap[weekNum] = { planned: 0, actual: 0, days: [], start: null, end: null };
-      }
-
-      // Safe index assignment to protect against short row ranges
-      const pDist = row[5] ? cleanNumericValue(row[5]) : 0;
-      const aDist = row[6] ? cleanNumericValue(row[6]) : 0;
-      const sessionDate = row[0] ? parseRowDate(row[0]) : null;
-      const sessionType = row[3] ? row[3].toString().trim() : "";
-      const dayName = row[2] ? row[2].toString().trim() : "Day";
-
-      weeklyMap[weekNum].planned += pDist;
-      weeklyMap[weekNum].actual += aDist;
-      calculatedTotalCompleted += aDist;
-
-      if (sessionDate) {
-        if (!weeklyMap[weekNum].start || sessionDate < weeklyMap[weekNum].start) weeklyMap[weekNum].start = sessionDate;
-        if (!weeklyMap[weekNum].end || sessionDate > weeklyMap[weekNum].end) weeklyMap[weekNum].end = sessionDate;
-      }
-
-      let detailText = sessionType;
-      if (aDist > 0) detailText += ` (done)`;
-      else if (pDist > 0) detailText = `${pDist}km Z2`;
-
-      if (sessionType !== "") {
-        weeklyMap[weekNum].days.push({ day: dayName, text: detailText });
-      }
-
-      if (sessionType.toLowerCase().includes("long run") || sessionType.toLowerCase().includes("lr ")) {
-        longRunsPlanned++;
-        if (aDist > 0) {
-          longRunsDone++;
-        } else if (weekNum === 2) {
-          week2WasMissed = true;
-        }
-      }
+function buildWeeklyData(rows) {
+  const data = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[W.week] || isNaN(parseInt(r[W.week]))) continue;
+    data.push({
+      week:       parseInt(r[W.week]),
+      startDate:  r[W.startDate] || '',
+      endDate:    r[W.endDate]   || '',
+      phase:      r[W.phase]     || '',
+      type:       r[W.type]      || '',
+      planned:    parseNum(r[W.planned]),
+      actual:     r[W.actual]    || '',
+      adherence:  r[W.adherence] || '',
+      lrActual:   r[W.lrActual]  || '',
+      lrTarget:   r[W.lrTarget]  || '',
+      track:      r[W.track]     || '',
+      notes:      r[W.notes]     || '',
     });
-
-    // Automatically establish current week context frame
-    let currentWeekNum = 5; 
-    Object.keys(weeklyMap).forEach(w => {
-      let wk = weeklyMap[w];
-      if (wk.start && wk.end && today >= wk.start && today <= wk.end) {
-        currentWeekNum = parseInt(w);
-      }
-    });
-    let nextWeekNum = currentWeekNum + 1;
-
-    // Push calculations cleanly to layout components
-    document.getElementById('totalKmVal').innerText = calculatedTotalCompleted.toFixed(1);
-    document.getElementById('totalPctDone').innerText = `${((calculatedTotalCompleted / totalPlannedMacro) * 100).toFixed(1)}% done`;
-    
-    let completedWeeksCount = Object.keys(weeklyMap).filter(w => parseInt(w) < currentWeekNum).length;
-    document.getElementById('adherenceWeeksLbl').innerText = `Wks 1-${currentWeekNum - 1} cumulative`;
-    document.getElementById('avgAdherenceVal').innerText = "100%";
-
-    let lrPct = longRunsPlanned > 0 ? Math.round((longRunsDone / longRunsPlanned) * 100) : 69;
-    document.getElementById('lrAdherenceVal').innerText = `${lrPct}%`;
-    document.getElementById('lrRatioLbl').innerText = `${longRunsDone} of ${longRunsPlanned} LRs completed`;
-    if (week2WasMissed) {
-      document.getElementById('lrMissedFlag').innerText = "Week 2 missed";
-    }
-
-    let phase1TotalWeeks = 6;
-    let completedPhase1Weeks = Math.min(phase1TotalWeeks, currentWeekNum - 1);
-    document.getElementById('phasePctVal').innerText = `${Math.round((completedPhase1Weeks / phase1TotalWeeks) * 100)}%`;
-    document.getElementById('phaseWeeksLbl').innerText = `${completedPhase1Weeks} of ${phase1TotalWeeks} weeks done`;
-
-    // Render snapshot blocks
-    renderSchedulePanel('cur', currentWeekNum, weeklyMap[currentWeekNum]);
-    renderSchedulePanel('next', nextWeekNum, weeklyMap[nextWeekNum]);
-
-    // Clear loading message out of insights container
-    document.getElementById('ai-insights-content').innerText = `Macrocycle synchronization complete. Syncing ${Object.keys(weeklyMap).length} historical training weeks seamlessly. Everything matches your goal models safely.`;
-
-    // Generate Chart
-    const sortedWeeks = Object.keys(weeklyMap).sort((a, b) => a - b);
-    renderChart(
-      sortedWeeks.map(w => `Wk ${w}`),
-      sortedWeeks.map(w => weeklyMap[w].planned),
-      sortedWeeks.map(w => parseInt(w) <= currentWeekNum ? weeklyMap[w].actual : null)
-    );
-
-  } catch (error) {
-    showError(error.message);
   }
+  return data;
 }
 
-function renderSchedulePanel(prefix, weekNum, weekData) {
-  if (!weekData) {
-    document.getElementById(`${prefix}DateRange`).innerText = "No data found";
-    return;
-  }
-  
-  document.getElementById(`${prefix}WeekHeader`).innerText = `WEEK ${weekNum} — ${prefix === 'cur' ? 'CURRENT' : 'NEXT UP'}`;
-  document.getElementById(`${prefix}VolumeTarget`).innerHTML = `${weekData.planned.toFixed(1)} <span>km target</span>`;
-  
-  if (weekData.start && weekData.end) {
-    const options = { month: 'short', day: 'numeric' };
-    document.getElementById(`${prefix}DateRange`).innerText = `${weekData.start.toLocaleDateString('en-US', options)}–${weekData.end.getDate()}`;
-  }
-
-  const daysBox = document.getElementById(`${prefix}DaysBox`);
-  daysBox.innerHTML = "";
-  
-  weekData.days.slice(0, 7).forEach(d => {
-    let cls = dayClassMap[d.day] || 'dot-th';
-    let rowHtml = `<div class="day-row"><div class="day-dot ${cls}">${d.day[0]}</div><div class="day-text">${d.text}</div></div>`;
-    daysBox.innerHTML += rowHtml;
+// ─────────────────────────────────────────
+// RENDER COMPONENT CONTROLLERS
+// ─────────────────────────────────────────
+function renderSummary(weeks) {
+  const completed = weeks.filter(w => {
+    const a = parseNum(w.actual);
+    return a > 0 && !String(w.actual).toLowerCase().includes('progress');
   });
+
+  const totalActual = completed.reduce((s,w) => s + parseNum(w.actual), 0);
+  const totalPlanned = weeks.reduce((s,w) => s + w.planned, 0);
+  const pctDone = totalPlanned > 0 ? (totalActual / totalPlanned * 100).toFixed(1) : 0;
+
+  const adherences = completed.filter(w => w.adherence && !w.adherence.toLowerCase().includes('progress'));
+  const avgAdh = adherences.length > 0
+    ? (adherences.reduce((s,w) => s + pct(w.adherence), 0) / adherences.length).toFixed(0)
+    : '—';
+
+  const lrCompleted = completed.filter(w => w.lrActual && parseNum(w.lrActual) > 0).length;
+  const lrTotal     = completed.length;
+  const lrPct       = lrTotal > 0 ? Math.round(lrCompleted / lrTotal * 100) : 0;
+
+  const phase1Weeks = weeks.filter(w => w.week >= PHASES[0].wStart && w.week <= PHASES[0].wEnd);
+  const phase1Done  = phase1Weeks.filter(w => {
+    const a = parseNum(w.actual);
+    return a > 0 && !String(w.actual).toLowerCase().includes('progress');
+  }).length;
+  const phase1Pct   = Math.round(phase1Done / phase1Weeks.length * 100);
+
+  const lrMissed = completed.filter(w => w.lrActual && (parseNum(w.lrActual) === 0 || w.lrActual === '0'));
+
+  const grid = document.getElementById('summary-grid');
+  grid.innerHTML = `
+    <div class="scard">
+      <div class="lbl">Total km completed</div>
+      <div class="val">${totalActual.toFixed(1)}</div>
+      <div class="sub">of ${totalPlanned.toFixed(1)}km planned</div>
+      <span class="badge ${parseFloat(pctDone)>=90?'bg':parseFloat(pctDone)>=70?'bw':'br'}">${pctDone}% done</span>
+    </div>
+    <div class="scard">
+      <div class="lbl">Avg weekly adherence</div>
+      <div class="val">${avgAdh !== '—' ? avgAdh+'%' : '—'}</div>
+      <div class="sub">Wks 1–${completed.length} cumulative</div>
+      <span class="badge ${parseFloat(avgAdh)>=90?'bg':parseFloat(avgAdh)>=75?'bw':'br'}">${parseFloat(avgAdh)>=90?'On track':parseFloat(avgAdh)>=75?'Monitor':'Below target'}</span>
+    </div>
+    <div class="scard">
+      <div class="lbl">Long run adherence</div>
+      <div class="val">${lrPct}%</div>
+      <div class="sub">${lrCompleted} of ${lrTotal} LRs completed</div>
+      <span class="badge ${lrMissed.length===0?'bg':'bw'}">${lrMissed.length===0?'All complete':`Wk ${lrMissed.map(w=>w.week).join(',')} missed`}</span>
+    </div>
+    <div class="scard">
+      <div class="lbl">Phase 1 completion</div>
+      <div class="val">${phase1Pct}%</div>
+      <div class="sub">${phase1Done} of ${phase1Weeks.length} weeks done</div>
+      <span class="badge ${phase1Pct>=100?'bg':phase1Pct>0?'bp':'bw'}">${phase1Pct>=100?'Complete':phase1Pct>0?'In progress':'Not started'}</span>
+    </div>
+  `;
 }
 
-function showError(msg) {
-  const box = document.getElementById('ai-insights-container');
-  box.className = "error-state";
-  document.getElementById('insights-title').innerText = "❌ Pipeline Connection Failure:";
-  document.getElementById('ai-insights-content').innerText = msg + " (Confirm that your Google Sheet has Link Sharing enabled for 'Anyone with the link' and your API key limits are unrestricted.)";
-}
+function renderChart(weeks) {
+  const planned = weeks.map(w => w.planned);
+  const actual  = weeks.map(w => {
+    const v = parseNum(w.actual);
+    return v > 0 && !String(w.actual).toLowerCase().includes('progress') ? v : null;
+  });
 
-function renderChart(labels, planned, actual) {
-  new Chart(document.getElementById('volChart').getContext('2d'), {
-    type: 'bar',
+  const barColors = weeks.map(w => {
+    if (RACE_WEEKS.includes(w.week))   return 'rgba(252,165,165,0.7)';
+    if (DELOAD_WEEKS.includes(w.week)) return 'rgba(253,211,77,0.7)';
+    if (w.week <= 6)  return 'rgba(147,197,253,0.8)';
+    if (w.week <= 14) return 'rgba(253,186,116,0.8)';
+    if (w.week <= 19) return 'rgba(252,165,165,0.8)';
+    return 'rgba(134,239,172,0.8)';
+  });
+
+  const ctx = document.getElementById('volChart').getContext('2d');
+  if (volChart) volChart.destroy();
+  volChart = new Chart(ctx, {
     data: {
-      labels: labels,
+      labels: weeks.map(w => `Wk ${w.week}`),
       datasets: [
-        { label: 'Actual', data: actual, backgroundColor: '#1D6FA8', barPercentage: 0.6 },
-        { type: 'line', label: 'Planned', data: planned, borderColor: 'rgba(147,197,253,0.9)', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3 }
+        { type:'bar',  label:'Actual km',    data:actual,  backgroundColor:'#1D6FA8', borderRadius:3, order:1 },
+        { type:'bar',  label:'Planned km',   data:planned, backgroundColor:barColors, borderRadius:3, order:2 },
+        { type:'line', label:'Planned (trend)', data:planned, borderColor:'rgba(100,116,139,0.4)', borderWidth:1.5, borderDash:[4,3], pointRadius:0, fill:false, order:0 },
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true }
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            afterTitle:(items)=>{ const w=items[0].dataIndex+1; const lbl={3:'Deload',6:'Deload',9:'Deload',12:'Deload',18:'Taper',19:'HYROX RACE',21:'Marathon'}; return lbl[w]?`(${lbl[w]})`:''; },
+            label:(ctx)=>ctx.raw?`${ctx.raw.toFixed(1)} km`:'—'
+          }
+        }
       },
-      plugins: { legend: { display: false } }
+      scales:{
+        x:{ ticks:{color:'#888',font:{size:9},maxRotation:45}, grid:{display:false} },
+        y:{ ticks:{color:'#888',font:{size:9}}, grid:{color:'rgba(128,128,128,0.1)'}, title:{display:true,text:'km',color:'#888',font:{size:10}} }
+      }
     }
   });
 }
 
-window.onload = loadDashboardData;
+function renderPhases(weeks) {
+  const grid = document.getElementById('phase-grid');
+  grid.innerHTML = PHASES.map(p => {
+    const phaseWeeks = weeks.filter(w => w.week >= p.wStart && w.week <= p.wEnd);
+    const doneWeeks  = phaseWeeks.filter(w => parseNum(w.actual) > 0 && !String(w.actual).toLowerCase().includes('progress'));
+    const kmDone     = doneWeeks.reduce((s,w) => s + parseNum(w.actual), 0);
+    const pctProg    = p.total > 0 ? Math.min(100, (kmDone / p.total * 100)).toFixed(0) : 0;
+    const isActive   = weeks.some(w => w.week >= p.wStart && w.week <= p.wEnd && String(w.type).toLowerCase().includes('progress'));
+    const isComplete = doneWeeks.length === phaseWeeks.length && phaseWeeks.length > 0;
+
+    let statusText, statusStyle;
+    if (isComplete)     { statusText=`Complete`; statusStyle=`background:${p.bg};color:${p.color}`; }
+    else if (isActive)  { statusText=`In Progress — Week ${doneWeeks.length+1} of ${phaseWeeks.length}`; statusStyle=`background:${p.bg};color:${p.color}`; }
+    else if (kmDone>0)  { statusText=`${doneWeeks.length} / ${phaseWeeks.length} weeks done`; statusStyle=`background:${p.bg};color:${p.color}`; }
+    else                { statusText=`Not started`; statusStyle=`background:#F1F5F9;color:#64748B`; }
+
+    return `
+      <div class="pcard ${p.cls}">
+        <h3 style="color:${p.color}">${p.label}</h3>
+        <div class="dates">${p.dates} · ${p.weeks}</div>
+        <div class="km-row"><span>Completed</span><span class="km-val" style="color:${p.color}">${kmDone.toFixed(1)} km</span></div>
+        <div class="km-row"><span>Planned total</span><span class="km-val">${p.total.toFixed(1)} km</span></div>
+        <div class="progress-bar" style="margin-top:8px">
+          <div class="progress-fill" style="width:${pctProg}%;background:${p.color}"></div>
+        </div>
+        <span class="status" style="${statusStyle}">${statusText}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderWeeksTable(weeks) {
+  const tbody = document.getElementById('weeks-tbody');
+  if (!weeks.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No data generated from logging system.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = weeks.map(w => {
+    const isInProgress = String(w.type).toLowerCase().includes('progress') || String(w.actual).toLowerCase().includes('progress');
+    const actualNum    = parseNum(w.actual);
+    const adhNum       = pct(w.adherence);
+    const isInProg     = String(w.adherence).toLowerCase().includes('progress');
+
+    const phaseNum = parseInt(String(w.phase).replace(/\D/g,''));
+    const typeLC   = String(w.type).toLowerCase();
+    let phaseTag;
+    if (typeLC.includes('deload'))          phaseTag = `<span class="phase-tag t-dl">Deload</span>`;
+    else if (phaseNum === 1)                phaseTag = `<span class="phase-tag t-p1">Phase 1</span>`;
+    else if (phaseNum === 2)                phaseTag = `<span class="phase-tag t-p2">Phase 2</span>`;
+    else if (phaseNum === 3)                phaseTag = `<span class="phase-tag t-p3">Phase 3</span>`;
+    else if (phaseNum === 4)                phaseTag = `<span class="phase-tag t-p4">Phase 4</span>`;
+    else                                    phaseTag = `<span class="phase-tag t-dl">${w.phase}</span>`;
+
+    const actualDisplay = isInProgress
+      ? `<strong style="color:#7C3AED">~${actualNum > 0 ? actualNum.toFixed(1)+'+' : 'In progress'}</strong>`
+      : `<strong>${actualNum.toFixed(1)}</strong>`;
+
+    let adhDisplay;
+    if (isInProg || isInProgress) {
+      adhDisplay = `<div class="adh-bar"><div class="adh-track"><div class="adh-fill" style="width:${Math.min(adhNum||40,100)}%;background:#7C3AED"></div></div><span class="t-prog">In progress</span></div>`;
+    } else {
+      const color = adhNum >= 100 ? '#15803D' : adhNum >= 80 ? '#D97706' : '#DC2626';
+      const cls   = adhNum >= 100 ? 't-good'  : adhNum >= 80 ? 't-warn'  : 't-crit';
+      adhDisplay = `<div class="adh-bar"><div class="adh-track"><div class="adh-fill" style="width:${Math.min(adhNum,100)}%;background:${color}"></div></div><span class="${cls}">${w.adherence || '—'}</span></div>`;
+    }
+
+    const lrA = parseNum(w.lrActual);
+    const lrT = parseNum(w.lrTarget);
+    let lrDisplay;
+    if (!w.lrActual && !w.lrTarget) {
+      lrDisplay = '—';
+    } else if (lrA === 0 && lrT > 0 && !isInProgress) {
+      lrDisplay = `<span class="t-crit">0 / ${lrT}km ✗</span>`;
+    } else if (lrA >= lrT && lrT > 0) {
+      lrDisplay = `<span class="t-good">${lrA} / ${lrT}km ${lrA > lrT ? '↑' : '✓'}</span>`;
+    } else if (lrA > 0 && lrT > 0) {
+      lrDisplay = `<span class="t-warn">${lrA} / ${lrT}km</span>`;
+    } else if (isInProgress) {
+      lrDisplay = `<span style="color:#7C3AED;font-weight:500">${lrT > 0 ? lrT+'km target' : 'pending'}</span>`;
+    } else {
+      lrDisplay = w.lrActual || '—';
+    }
+
+    let trackDisplay;
+    if (!w.track || w.track === '—') {
+      trackDisplay = '—';
+    } else if (w.track.toLowerCase().includes('✓') || w.track.toLowerCase().includes('done') || parseNum(w.track) > 0) {
+      trackDisplay = `<span class="t-good">${w.track}</span>`;
+    } else if (isInProgress) {
+      trackDisplay = `<span style="color:#7C3AED;font-weight:500">${w.track}</span>`;
+    } else {
+      trackDisplay = w.track;
+    }
+
+    const dateRange = w.startDate && w.endDate ? `${w.startDate}–${w.endDate}` : w.startDate || '';
+
+    return `
+      <tr>
+        <td><span class="week-num">${w.week}${isInProgress ? ' <span class="curr-badge">NOW</span>' : ''}</span></td>
+        <td>${dateRange}</td>
+        <td>${phaseTag}</td>
+        <td>${w.planned.toFixed(1)}</td>
+        <td>${actualDisplay}</td>
+        <td>${adhDisplay}</td>
+        <td>${lrDisplay}</td>
+        <td>${trackDisplay}</td>
+        <td class="note-cell">${w.notes}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderKPI(rows) {
+  const tbody = document.getElementById('kpi-tbody');
+  if (!rows || rows.length <= 1) {
+    tbody.innerHTML = `
+      <tr><td><strong>Aerobic Decoupling</strong></td><td class="kpi-val-warn">~7–10% (outdoor LRs)</td><td>&lt; 7%</td><td>&lt; 5%</td><td>↗ Improving</td><td>Manual (long runs)</td></tr>
+      <tr><td><strong>Efficiency Factor</strong></td><td class="kpi-val-warn">1.09</td><td>1.18</td><td>1.25+</td><td>→ Baseline</td><td>Manual calc</td></tr>
+      <tr><td><strong>Pace at Z2 ceiling</strong></td><td class="kpi-val-warn">~6:05/km at HR 154</td><td>5:50/km</td><td>5:38/km</td><td>→ Too early</td><td>Monthly flat run</td></tr>
+      <tr><td><strong>Z2 Adherence Rate</strong></td><td class="kpi-val-good">100% this week</td><td>&gt; 85%</td><td>&gt; 85%</td><td>↗ Big improvement</td><td>Garmin / Manual</td></tr>
+      <tr><td><strong>Cadence at Z2</strong></td><td class="kpi-val-warn">166–172 spm</td><td>172–176 spm</td><td>174–178 spm</td><td>↗ 172 spm outdoor</td><td>Garmin auto</td></tr>
+      <tr><td><strong>Vertical Oscillation Ratio</strong></td><td class="kpi-val-good">9.2%</td><td>&lt; 9.0%</td><td>&lt; 8.5%</td><td>→ Solid baseline</td><td>Garmin auto</td></tr>
+      <tr><td><strong>Ground Contact Time</strong></td><td class="kpi-val-warn">269ms</td><td>&lt; 260ms</td><td>&lt; 250ms at MP</td><td>→ Baseline</td><td>Garmin auto</td></tr>
+      <tr><td><strong>Morning Achilles Stiffness</strong></td><td class="kpi-val-good">0–1 / 10</td><td>Stay 0–1</td><td>Stay 0–1</td><td>✓ Prehab working</td><td>Daily self-report</td></tr>
+      <tr><td><strong>Weekly Volume Adherence</strong></td><td class="kpi-val-good">100% cumulative</td><td>&gt; 85%</td><td>&gt; 85%</td><td>→ On track</td><td>Garmin / Manual</td></tr>
+      <tr><td><strong>Wall Ball Unbroken Max</strong></td><td class="kpi-val-warn">~40 est.</td><td>75 (Wk 8)</td><td>100 (Wk 11+)</td><td>→ First formal test Sun Wk 5</td><td>Manual log</td></tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.slice(1).filter(r => r[0]).map(r => {
+    const statusCls = (r[2]||'').toLowerCase() === 'good' ? 'kpi-val-good' : (r[2]||'').toLowerCase() === 'crit' ? 'kpi-val-crit' : 'kpi-val-warn';
+    return `<tr>
+      <td><strong>${r[0]||''}</strong></td>
+      <td class="${statusCls}">${r[1]||'—'}</td>
+      <td>${r[3]||'—'}</td>
+      <td>${r[4]||'—'}</td>
+      <td>${r[5]||'—'}</td>
+      <td>${r[6]||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAlerts(rows) {
+  const container = document.getElementById('alerts-container');
+  if (!rows || rows.length <= 1) {
+    container.innerHTML = ''; return;
+  }
+  const chips = rows.slice(1).filter(r => r[3]).map(r => {
+    const cls = (r[0]||'').toLowerCase().includes('good') ? 'a-good' : (r[0]||'').toLowerCase().includes('warn') ? 'a-warn' : 'a-info';
+    return `<div class="alert-chip ${cls}">${r[1]||''} <div><strong>${r[2]||''}</strong> — ${r[3]||''}</div></div>`;
+  }).join('');
+  container.innerHTML = chips;
+}
+
+function updateTopbar(weeks) {
+  const current = weeks.find(w => String(w.type).toLowerCase().includes('progress'));
+  const completed = weeks.filter(w => parseNum(w.actual)>0 && !String(w.actual).toLowerCase().includes('progress')).length;
+  const plan = 'Base: Hal Higdon Intermediate 1';
+  const wkText = current ? `Week ${current.week} of 21` : `${completed} weeks completed`;
+  const now = new Date();
+  const updated = now.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('topbar-sub').textContent = `${wkText} · Updated ${updated} · ${plan}`;
+}
+
+// ─────────────────────────────────────────
+// APPLICATION SYSTEM BOOT
+// ─────────────────────────────────────────
+let refreshTimer = null;
+
+async function loadAll(manual = false) {
+  const bar = document.getElementById('last-updated');
+  bar.innerHTML = '<span class="spinner"></span>Fetching from Google Sheets…';
+  document.getElementById('error-banner').style.display = 'none';
+
+  try {
+    const weekRows = await fetchCSV(TABS.weekly);
+    const weeks = buildWeeklyData(weekRows);
+
+    if (!weeks.length) throw new Error('Data parse error: Verify rows contain metric tracking details under structural headers.');
+
+    updateCountdowns();
+    updateTopbar(weeks);
+    renderSummary(weeks);
+    renderChart(weeks);
+    renderPhases(weeks);
+    renderWeeksTable(weeks);
+
+    if (TABS.kpi) {
+      try { const kpiRows = await fetchCSV(TABS.kpi); renderKPI(kpiRows); } catch { renderKPI(null); }
+    } else { renderKPI(null); }
+
+    if (TABS.alerts) {
+      try { const alertRows = await fetchCSV(TABS.alerts); renderAlerts(alertRows); } catch { renderAlerts(null); }
+    }
+
+    const now = new Date();
+    bar.textContent = `Last updated ${now.toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})} · Auto-refreshes every 5 min`;
+
+  } catch (err) {
+    console.error(err);
+    const banner = document.getElementById('error-banner');
+    document.getElementById('error-detail').textContent = err.message;
+    banner.style.display = 'block';
+    bar.textContent = 'Failed to load — click Refresh to retry';
+  }
+
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => loadAll(), 5 * 60 * 1000);
+}
+
+updateCountdowns();
+loadAll();
 </script>
 </body>
 </html>
