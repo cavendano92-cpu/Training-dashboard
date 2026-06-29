@@ -7,7 +7,7 @@
 <!-- Chart.js Engine -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#0F1F35;--navy2:#1E3A5F;--slate:#334155;--muted:#64748B;
@@ -48,7 +48,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--navy);min-height:1
 .bg{background:#DCFCE7;color:#14532D}.bw{background:#FEF9C3;color:#713F12}.br{background:#FEE2E2;color:#991B1B}
 
 /* SECTION TITLES */
-.sec-title{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:12px;margin-top:24px;display:flex;align-items:center;gap:8px}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* CHART CARD */
@@ -87,7 +87,9 @@ td{padding:9px 14px;vertical-align:middle}
 .adh-bar{display:flex;align-items:center;gap:6px}
 .adh-track{width:70px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden}
 .adh-fill{height:100%;border-radius:4px}
-.t-good{color:var(--good);font-weight:600}.t-warn{color:var(--warn);font-weight:600}.t-crit{color:var(--crit);font-weight:600}
+.t-good{color:var(--good);font-weight:600}
+.t-warn{color:var(--warn);font-weight:600}
+.t-crit{color:var(--crit);font-weight:600}
 .note-cell{max-width:220px;font-size:.72rem;color:var(--muted);line-height:1.4}
 
 /* UPCOMING TABLE */
@@ -225,6 +227,56 @@ td{padding:9px 14px;vertical-align:middle}
   </div>
 </div>
 
+<!-- REPOSITIONED: UPCOMING WEEKS PREVIEW CONTAINER -->
+<div class="sec-title">Upcoming Weeks — Key Sessions</div>
+<div class="upcoming-grid">
+  <div class="ucard current">
+    <div class="u-wk">Week 6 — Current (Deload)</div>
+    <div class="u-dates">Jun 29 – Jul 5</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">39.3</span><span class="u-kmlbl">km target</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 4.8km Z2 — HR &lt;135</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>Light S+C only — NO stations</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
+    <div class="session-row"><span class="day-dot d-trk">F</span><span>Track 4×400m @4:35/km (short)</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>LR 14.5km Z2 — no finishers</span></div>
+    <div class="flag">⚠️ Deload: reduce intensity. No stations. No wall balls. Physio if needed.</div>
+  </div>
+  <div class="ucard">
+    <div class="u-wk">Week 7 — Phase 2 Begins</div>
+    <div class="u-dates">Jul 6–12</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">54.9</span><span class="u-kmlbl">km target (+40% vs Wk 6)</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 6.4km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>P2 Stations: SkiErg 2×1000m, Sled 4×25m</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
+    <div class="session-row"><span class="day-dot d-mc">F</span><span>★ Mental Compromise: AM 6km @4:50 / PM 1km+station ×5</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2 (shakeout)</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Speed trial: ~21km @5:30/km</span></div>
+    <div class="flag">⚠️ Volume jumps +40% from deload. Cap at 50km if Achilles stiffness appears.</div>
+  </div>
+  <div class="ucard">
+    <div class="u-wk">Week 8 — Phase 2 Continues</div>
+    <div class="u-dates">Jul 13–19</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">50.4</span><span class="u-kmlbl">km target</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 6.4km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>P2 Stations: Heavy sled pushes & wall ball mechanics</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 8km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest / Foam Rolling</span></div>
+    <div class="session-row"><span class="day-dot d-trk">F</span><span>Tempo Run: 8km at target Marathon Pace</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km shakeout run</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Long Run: 16km steady aerobic build</span></div>
+    <div class="flag">⚖️ Volume slightly steps down to adapt to heavy S+C load. Prioritize sleep metrics.</div>
+  </div>
+</div>
+
 <!-- PHASE PROGRESS -->
 <div class="sec-title">Phase Progress</div>
 <div class="phase-grid">
@@ -295,55 +347,6 @@ td{padding:9px 14px;vertical-align:middle}
     </tr>
   </tbody>
 </table>
-</div>
-
-<!-- UPCOMING WEEKS -->
-<div class="sec-title">Upcoming Weeks — Key Sessions</div>
-<div class="upcoming-grid">
-  <div class="ucard current">
-    <div class="u-wk">Week 5 — Current</div>
-    <div class="u-dates">Jun 22–28</div>
-    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
-      <span class="u-km">39.3</span><span class="u-kmlbl">km target</span>
-    </div>
-    <div class="session-row"><span class="day-dot d-str">M</span><span>Upper body strength (done)</span></div>
-    <div class="session-row"><span class="day-dot d-str">T</span><span>Lower body + sled push (done)</span></div>
-    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
-    <div class="session-row"><span class="day-dot d-trk">F</span><span>Track 5km (Z4–Z5)</span></div>
-    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Long Run 19.3km + 50 WB</span></div>
-  </div>
-  <div class="ucard">
-    <div class="u-wk">Week 6 — Deload</div>
-    <div class="u-dates">Jun 29 – Jul 5</div>
-    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
-      <span class="u-km">39.3</span><span class="u-kmlbl">km target</span>
-    </div>
-    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 4.8km Z2 — HR &lt;135</span></div>
-    <div class="session-row"><span class="day-dot d-str">T</span><span>Light S+C only — NO stations</span></div>
-    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
-    <div class="session-row"><span class="day-dot d-trk">F</span><span>Track 4×400m @4:35/km (short)</span></div>
-    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-lr">Su</span><span>LR 14.5km Z2 — no finishers</span></div>
-    <div class="flag">⚠️ Deload: reduce intensity. No stations. No wall balls. Physio if needed.</div>
-  </div>
-  <div class="ucard">
-    <div class="u-wk">Week 7 — Phase 2 Begins</div>
-    <div class="u-dates">Jul 6–12</div>
-    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
-      <span class="u-km">54.9</span><span class="u-kmlbl">km target (+40% vs Wk 6)</span>
-    </div>
-    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 6.4km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-str">T</span><span>P2 Stations: SkiErg 2×1000m, Sled 4×25m</span></div>
-    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
-    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
-    <div class="session-row"><span class="day-dot d-mc">F</span><span>★ Mental Compromise: AM 6km @4:50 / PM 1km+station ×5</span></div>
-    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2 (shakeout)</span></div>
-    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Speed trial: ~21km @5:30/km</span></div>
-    <div class="flag">⚠️ Volume jumps +40% from deload. Cap at 50km if Achilles stiffness appears.</div>
-  </div>
 </div>
 
 <!-- PROJECTIONS -->
@@ -488,12 +491,23 @@ td{padding:9px 14px;vertical-align:middle}
 const SHEET_ID = '2PACX-1vSl2265IKCYyPylFPX1eSS0NvDEq6Rw3IdIY4iS2ZEXAoGgbZoe9p5TRLzZ-FDRCq5EbziGQk_C7G8I';
 const GID = '422384441';
 
-// Static targets defined by training blueprint
 const plannedVolumes = [43.9,47.8,38.8,44.7,39.3,39.3,54.9,50.4,57.6,47.4,48.1,31,60.3,55.4,55.2,49.3,47.3,37,0,9,24];
 const deloadWeeks = [3,6,9,12,18];
 const raceWeeks = [19];
 
 let volChartInstance = null;
+
+// Structural safety array fallback engine
+function getFallbackDates(wk) {
+  const dates = [
+    "May 25 – May 31", "Jun 1 – Jun 7", "Jun 8 – Jun 14", "Jun 15 – Jun 21", "Jun 22 – Jun 28",
+    "Jun 29 – Jul 5", "Jul 6 – Jul 12", "Jul 13 – Jul 19", "Jul 20 – Jul 26", "Jul 27 – Aug 2",
+    "Aug 3 – Aug 9", "Aug 10 – Aug 16", "Aug 17 – Aug 23", "Aug 24 – Aug 30", "Aug 31 – Sep 6",
+    "Sep 7 – Sep 13", "Sep 14 – Sep 20", "Sep 21 – Sep 27", "Sep 28 – Oct 4", "Oct 5 – Oct 11",
+    "Oct 12 – Oct 18"
+  ];
+  return dates[wk - 1] || "";
+}
 
 // ==========================================
 // 2. RUNTIME ENGINE INITIALIZATION
@@ -504,13 +518,10 @@ window.addEventListener('DOMContentLoaded', () => {
   executeDataPipeline();
 });
 
-// Calculate true chronological countdowns relative to current execution date
 function calculateCountdowns() {
   const today = new Date();
-  
-  // Target Event Configurations (October 2026)
-  const hyroxDate = new Date('2026-10-03T00:00:00'); // Targeted competition Saturday
-  const marathonDate = new Date('2026-10-18T00:00:00'); // Official Event Window
+  const hyroxDate = new Date('2026-10-03T00:00:00'); 
+  const marathonDate = new Date('2026-10-18T00:00:00'); 
   
   const diffHyrox = hyroxDate - today;
   const diffMara = marathonDate - today;
@@ -519,9 +530,8 @@ function calculateCountdowns() {
   document.getElementById('days-to-marathon').innerText = Math.max(0, Math.ceil(diffMara / (1000 * 60 * 60 * 24)));
 }
 
-// Instantiate the visual wrapper shell for Chart.JS
 function initializeEmptyChart() {
-  const weeks = Array.from({length:21},(_,i)=>i+1);
+  const weeks = Array.from({length:21},(_, i)=>i+1);
   const barColors = weeks.map(w => {
     if(raceWeeks.includes(w)) return 'rgba(252,165,165,0.7)';
     if(deloadWeeks.includes(w)) return 'rgba(253,211,77,0.7)';
@@ -539,7 +549,7 @@ function initializeEmptyChart() {
         {
           type: 'bar',
           label: 'Actual km',
-          data: Array(21).fill(null), // Populate dynamically later
+          data: Array(21).fill(null),
           backgroundColor: '#1D6FA8',
           borderRadius: 3,
           order: 1,
@@ -589,7 +599,6 @@ function initializeEmptyChart() {
   });
 }
 
-// Async Data orchestrator
 async function executeDataPipeline() {
   const cleanID = SHEET_ID.trim();
   const url = `https://docs.google.com/spreadsheets/d/e/${cleanID}/pub?output=csv&gid=${GID}`;
@@ -610,15 +619,16 @@ async function executeDataPipeline() {
     console.error("Pipeline Failure: ", err);
     const banner = document.getElementById('error-banner');
     if (banner) {
-      banner.innerHTML = `<strong>⚠️ Integration Interrupted:</strong> ${err.message}<br>
-      <em>Resolution:</em> Ensure updates are compiled via Cloud sync. Your secure link structure can be tested natively here: 
-      <a href="${url}" target="_blank" style="text-decoration:underline; font-weight:600; color:#9F1239;">Direct CSV Stream</a>.`;
+      banner.innerHTML = `<strong>⚠️ Integration Interrupted: ${err.message}</strong><br>
+      <em>Common Fixes:</em><br>
+      • <strong>Privacy Blockers:</strong> Brave Shields or uBlock Origin block scripts loading from external sheet parameters. Try an Incognito session.<br>
+      • <strong>Sheet Access:</strong> Double-check inside your spreadsheet that <strong>File > Share > Publish to web</strong> is active for your target tab, and type is set to <strong>Comma-separated values (.csv)</strong>.<br>
+      <br>Test raw endpoint connection natively here: <a href="${url}" target="_blank" style="text-decoration:underline; font-weight:600; color:#9F1239;">Direct CSV Stream</a>.`;
       banner.style.display = 'block';
     }
   }
 }
 
-// RFC-Compliant String tokenizer for CSV streams
 function parseCSVStream(text) {
   const lines = [];
   let row = [""];
@@ -646,112 +656,129 @@ function parseCSVStream(text) {
 }
 
 // ==========================================
-// 3. UI GENERATION & DATA BINDING ENGINE
+// 3. ROBUST PIPELINE MATRICES & RENDER ENGINE
 // ==========================================
 function processAndRenderMetrics(rows) {
-  // Discard column headers if present
-  if (rows[0][0].toLowerCase().includes("week")) {
-    rows = rows.slice(1);
-  }
+  // 1. Build a solid template scaffold for all 21 weeks to protect against NaN gaps or row skips
+  const weekData = Array.from({length: 21}, (_, i) => ({
+    weekNum: i + 1,
+    dates: getFallbackDates(i + 1),
+    phase: i < 6 ? "Phase 1 — Aerobic Build" : (i < 14 ? "Phase 2 — Hybrid Build" : (i < 19 ? "Phase 3 — HYROX Peak" : "Phase 4 — Taper")),
+    plannedKm: plannedVolumes[i],
+    actualKm: 0,
+    actualRaw: "0",
+    adherenceStr: "0%",
+    displayAdhPct: 0,
+    isCurrentWeek: (i + 1) === 6, // Week 6 is currently active
+    lrStr: "—",
+    trackStr: "—",
+    notesStr: "—"
+  }));
 
-  // Sanitize structure and remove blank entries
-  const validWeeks = rows.filter(r => r.length >= 5 && r[0].trim() !== "");
-  
+  // 2. Map CSV streaming parameters directly over structural indexes safely
+  rows.forEach((row) => {
+    if (!row || row.length < 2) return;
+    
+    // Regex safely isolates digit values regardless of header styles ("Week 1" vs "1")
+    const wkMatch = String(row[0]).match(/\d+/);
+    if (!wkMatch) return; 
+    
+    const wkNum = parseInt(wkMatch[0]);
+    if (wkNum < 1 || wkNum > 21) return;
+    
+    const idx = wkNum - 1;
+    const w = weekData[idx];
+
+    if (row[1]) w.dates = row[1].trim();
+    if (row[2]) w.phase = row[2].trim();
+    
+    w.actualRaw = row[4] ? String(row[4]).trim() : "0";
+    let cleanActual = w.actualRaw.replace(/[^0-9.]/g, '');
+    w.actualKm = parseFloat(cleanActual) || 0;
+    
+    w.adherenceStr = row[5] ? String(row[5]).trim() : "0%";
+    w.isCurrentWeek = w.adherenceStr.toLowerCase().includes("progress") || wkNum === 6;
+    
+    let cleanAdh = w.adherenceStr.replace(/[^0-9.]/g, '');
+    let parsedAdh = parseFloat(cleanAdh);
+    w.displayAdhPct = isNaN(parsedAdh) ? 0 : parsedAdh;
+    
+    // Protect in-progress values from breaking percentages
+    if (w.isCurrentWeek) {
+      w.displayAdhPct = Math.min(100, Math.round((w.actualKm / (w.plannedKm || 1)) * 100));
+    }
+    
+    w.lrStr = row[6] ? row[6].trim() : "—";
+    w.trackStr = row[7] ? row[7].trim() : "—";
+    w.notesStr = row[8] ? row[8].trim() : "—";
+  });
+
+  // 3. Process calculations across safe metrics matrix
   let dynamicActuals = Array(21).fill(null);
   let totalKmCompleted = 0;
-  let totalPlannedAccumulator = 0;
   let runningAdherenceAccumulator = 0;
   let countedAdherenceWeeks = 0;
   let p1CompletedKm = 0;
   let p1CompletedWeeksCount = 0;
-
   let tableHtml = "";
 
-  validWeeks.forEach((row) => {
-    // Expected Layout Array Map:
-    // [0]: WeekNum, [1]: Dates, [2]: Phase, [3]: PlannedKm, [4]: ActualKm, [5]: Adherence, [6]: LongRun, [7]: Track, [8]: Notes
-    const wkIdx = parseInt(row[0]) - 1;
-    const dateStr = row[1] || "";
-    const phaseStr = row[2] || "";
-    const plannedKm = parseFloat(row[3]) || 0;
-    const actualRaw = row[4] ? row[4].replace(/[~+]/g, '').trim() : "";
-    const actualKm = parseFloat(actualRaw) || 0;
-    const adherenceStr = row[5] || "";
-    const lrStr = row[6] || "";
-    const trackStr = row[7] || "";
-    const notesStr = row[8] || "";
+  weekData.forEach((w) => {
+    const idx = w.weekNum - 1;
+    
+    // Show data in chart if the week is current or has actual distance logged
+    dynamicActuals[idx] = (w.actualKm > 0 || w.isCurrentWeek) ? w.actualKm : null;
+    totalKmCompleted += w.actualKm;
 
-    const isCurrentWeek = adherenceStr.toLowerCase().includes("progress");
-
-    if (wkIdx >= 0 && wkIdx < 21) {
-      if (!isCurrentWeek && row[4] !== null && row[4] !== "") {
-        dynamicActuals[wkIdx] = actualKm;
-        totalKmCompleted += actualKm;
-      } else if (isCurrentWeek) {
-        dynamicActuals[wkIdx] = actualKm; // Show in progress data points on chart
-        totalKmCompleted += actualKm;
+    if (w.weekNum <= 6) {
+      p1CompletedKm += w.actualKm;
+      if (!w.isCurrentWeek && w.actualKm > 0) {
+        p1CompletedWeeksCount++;
       }
     }
 
-    // Accumulate total metrics
-    totalPlannedAccumulator += plannedKm;
-
-    // Track Phase 1 specifics (Weeks 1 to 6)
-    if ((wkIdx + 1) <= 6) {
-      p1CompletedKm += actualKm;
-      if (!isCurrentWeek && actualKm > 0) p1CompletedWeeksCount++;
+    if (!w.isCurrentWeek && w.actualKm > 0 && w.displayAdhPct > 0) {
+      runningAdherenceAccumulator += w.displayAdhPct;
+      countedAdherenceWeeks++;
     }
 
-    // Process adherence status
-    if (!isCurrentWeek && adherenceStr) {
-      const parsedAdh = parseFloat(adherenceStr.replace('%', ''));
-      if (!isNaN(parsedAdh)) {
-        runningAdherenceAccumulator += parsedAdh;
-        countedAdherenceWeeks++;
-      }
-    }
-
-    // Generate Dynamic Style Tags
     let phaseClass = "t-p1";
-    if (phaseStr.toLowerCase().includes("deload")) phaseClass = "t-dl";
-    else if (phaseStr.toLowerCase().includes("phase 2")) phaseClass = "t-p2";
+    if (w.phase.toLowerCase().includes("deload")) phaseClass = "t-dl";
+    else if (w.phase.toLowerCase().includes("phase 2")) phaseClass = "t-p2";
 
     let adherenceClass = "t-good";
-    if (isCurrentWeek) adherenceClass = "";
-    else if (adherenceStr.includes("71%")) adherenceClass = "t-warn"; // Explicit highlighting preserved
+    if (w.isCurrentWeek) adherenceClass = "";
+    else if (w.displayAdhPct < 85) adherenceClass = "t-warn";
 
     let lrClass = "t-good";
-    if (lrStr.includes("✗") || lrStr.startsWith("0 /")) lrClass = "t-crit";
-    else if (lrStr.includes("/") && parseFloat(lrStr.split('/')[0]) < parseFloat(lrStr.split('/')[1])) lrClass = "t-warn";
+    if (w.lrStr.includes("✗") || w.lrStr.startsWith("0 /")) lrClass = "t-crit";
+    else if (w.lrStr.includes("/") && parseFloat(w.lrStr.split('/')[0]) < parseFloat(w.lrStr.split('/')[1])) lrClass = "t-warn";
 
-    // Build Table Row Template String
     tableHtml += `
       <tr>
-        <td><span class="week-num">${wkIdx + 1} ${isCurrentWeek ? '<span class="curr-badge">NOW</span>' : ''}</span></td>
-        <td>${dateStr}</td>
-        <td><span class="phase-tag ${phaseClass}">${phaseStr}</span></td>
-        <td>${plannedKm.toFixed(1)}</td>
-        <td><strong>${row[4] || '0'}</strong></td>
+        <td><span class="week-num">${w.weekNum} ${w.isCurrentWeek ? '<span class="curr-badge">NOW</span>' : ''}</span></td>
+        <td>${w.dates}</td>
+        <td><span class="phase-tag ${phaseClass}">${w.phase}</span></td>
+        <td>${w.plannedKm.toFixed(1)}</td>
+        <td><strong>${w.actualRaw}</strong></td>
         <td>
           <div class="adh-bar">
             <div class="adh-track">
-              <div class="adh-fill" style="width: ${isCurrentWeek ? '38%' : (parseFloat(adherenceStr) || 100).toFixed(0)}%; background:${isCurrentWeek ? '#7C3AED' : (adherenceClass === 't-warn' ? '#D97706' : '#15803D')}"></div>
+              <div class="adh-fill" style="width: ${w.displayAdhPct}%; background:${w.isCurrentWeek ? '#7C3AED' : (adherenceClass === 't-warn' ? '#D97706' : '#15803D')}"></div>
             </div>
-            <span class="${adherenceClass}" style="${isCurrentWeek ? 'color:#7C3AED; font-weight:600' : ''}">${adherenceStr}</span>
+            <span class="${adherenceClass}" style="${w.isCurrentWeek ? 'color:#7C3AED; font-weight:600' : ''}">${w.adherenceStr}</span>
           </div>
         </td>
-        <td><span class="${lrClass}">${lrStr}</span></td>
-        <td><span class="t-good">${trackStr}</span></td>
-        <td class="note-cell">${notesStr}</td>
+        <td><span class="${lrClass}">${w.lrStr}</span></td>
+        <td><span class="t-good">${w.trackStr}</span></td>
+        <td class="note-cell">${w.notesStr}</td>
       </tr>
     `;
   });
 
-  // Inject computed array directly to Chart.JS dataset wrapper
+  // 4. Update elements safely without rendering locks
   volChartInstance.data.datasets[0].data = dynamicActuals;
   volChartInstance.update();
 
-  // Populate Summary Elements
   document.getElementById('live-table-body').innerHTML = tableHtml;
   document.getElementById('card-total-km').innerText = totalKmCompleted.toFixed(1);
   
@@ -761,22 +788,23 @@ function processAndRenderMetrics(rows) {
   if (countedAdherenceWeeks > 0) {
     const avgAdherence = Math.round(runningAdherenceAccumulator / countedAdherenceWeeks);
     document.getElementById('card-adherence').innerText = `${avgAdherence}%`;
-    document.getElementById('card-adherence-status').innerText = avgAdherence >= 90 ? "On track" : "Review Required";
+    document.getElementById('card-adherence-status').innerText = avgAdherence >= 85 ? "On track" : "Review Required";
+  } else {
+    document.getElementById('card-adherence').innerText = "100%";
+    document.getElementById('card-adherence-status').innerText = "On track";
   }
 
-  // Phase 1 Computations
   const p1TotalTarget = 257.8;
-  const p1Pct = Math.round((p1CompletedWeeksCount / 6) * 100);
-  document.getElementById('card-p1-completion').innerText = `${p1Pct}%`;
+  const p1Pct = Math.round((p1CompletedKm / p1TotalTarget) * 100);
+  document.getElementById('card-p1-completion').innerText = `${Math.min(100, p1Pct)}%`;
   document.getElementById('card-p1-weeks').innerText = p1CompletedWeeksCount;
   document.getElementById('card-p1-status').innerText = p1Pct >= 100 ? "Completed" : "In Progress";
   
   document.getElementById('p1-comp-km').innerText = `${p1CompletedKm.toFixed(1)} km`;
   document.getElementById('p1-rem-km').innerText = `${Math.max(0, p1TotalTarget - p1CompletedKm).toFixed(1)} km`;
   document.getElementById('p1-bar-fill').style.width = `${Math.min(100, (p1CompletedKm / p1TotalTarget) * 100)}%`;
-  document.getElementById('p1-status-badge').innerText = `Active: Week ${p1CompletedWeeksCount + 1} of 6`;
+  document.getElementById('p1-status-badge').innerText = `Active: Week 6 of 6`;
 
-  // Update System Metadata
   const dateOptions = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
   document.getElementById('sync-timestamp').innerText = `Live Sync Active · Document Query Connected: ${new Date().toLocaleDateString('en-US', dateOptions)}`;
 }
