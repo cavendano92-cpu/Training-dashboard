@@ -1,202 +1,785 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance & Training Dashboard</title>
-    <!-- Tailwind CSS for clean, modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Smooth transitions for interactive elements */
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Dashboard — Christian Avendano 2026</title>
+<!-- Chart.js Engine -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0F1F35;--navy2:#1E3A5F;--slate:#334155;--muted:#64748B;
+  --border:#E2E8F0;--bg:#F1F5F9;--white:#fff;
+  --p1:#1D6FA8;--p1bg:#EFF6FF;--p1border:#BFDBFE;
+  --p2:#B45309;--p2bg:#FFFBEB;--p2border:#FDE68A;
+  --p3:#9F1239;--p3bg:#FFF1F2;--p3border:#FECDD3;
+  --p4:#15803D;--p4bg:#F0FDF4;--p4border:#BBF7D0;
+  --good:#15803D;--warn:#B45309;--crit:#DC2626;--neu:#334155;
+  --font:'Inter',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--navy);min-height:100vh;padding:0 0 3rem}
+
+/* TOPBAR */
+.topbar{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
+.topbar .sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:1px}
+.countdowns{display:flex;gap:12px;flex-wrap:wrap}
+.countdown-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;text-align:center}
+.countdown-chip .days{font-size:1.3rem;font-weight:700;line-height:1}
+.countdown-chip .label{font-size:.65rem;color:rgba(255,255,255,.6);margin-top:2px}
+.hyrox-chip{border-color:#FCD34D;background:rgba(252,211,77,.12)}
+.mara-chip{border-color:#6EE7B7;background:rgba(110,231,183,.1)}
+
+/* WRAPPER */
+.wrap{max-width:1140px;margin:0 auto;padding:20px 16px}
+
+/* CONNECTION ERROR BANNER */
+#error-banner { display:none; background:#FFF1F2; border:1px solid #FECDD3; color:#9F1239; padding:14px; border-radius:12px; margin-bottom:20px; font-size:0.85rem; line-height:1.4; }
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.scard{background:var(--white);border-radius:12px;padding:14px 16px;border:1px solid var(--border)}
+.scard .lbl{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.scard .val{font-size:1.65rem;font-weight:700;color:var(--navy);line-height:1.1}
+.scard .sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.scard .badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.68rem;font-weight:600;margin-top:4px}
+.bg{background:#DCFCE7;color:#14532D}.bw{background:#FEF9C3;color:#713F12}.br{background:#FEE2E2;color:#991B1B}
+
+/* SECTION TITLES */
+.sec-title{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CHART CARD */
+.chart-card{background:var(--white);border-radius:12px;padding:18px 20px;border:1px solid var(--border);margin-bottom:20px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.chart-title{font-size:.85rem;font-weight:600;color:var(--navy)}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* PHASE CARDS */
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.pcard{background:var(--white);border-radius:12px;padding:14px 16px;border:1px solid var(--border);border-top:3px solid}
+.pcard h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.pcard .dates{font-size:.7rem;color:var(--muted);margin-bottom:10px}
+.pcard .km-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
+.pcard .km-val{font-weight:600}
+.progress-bar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+.pcard .status{font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:6px;display:inline-block}
+.p1c{border-top-color:var(--p1)}.p2c{border-top-color:var(--p2)}.p3c{border-top-color:var(--p3)}.p4c{border-top-color:var(--p4)}
+
+/* COMPLETED WEEKS TABLE */
+.table-card{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:20px;overflow:hidden}
+table{border-collapse:collapse;width:100%;font-size:.78rem}
+thead{background:var(--navy)}
+thead th{padding:9px 14px;text-align:left;font-size:.67rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F8FAFC}
+td{padding:9px 14px;vertical-align:middle}
+.week-num{font-weight:700;color:var(--navy)}
+.phase-tag{display:inline-block;padding:1px 7px;border-radius:6px;font-size:.65rem;font-weight:600}
+.t-p1{background:var(--p1bg);color:var(--p1)}.t-p2{background:var(--p2bg);color:var(--p2)}
+.t-dl{background:#F1F5F9;color:#475569}
+.adh-bar{display:flex;align-items:center;gap:6px}
+.adh-track{width:70px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.adh-fill{height:100%;border-radius:4px}
+.t-good{color:var(--good);font-weight:600}.t-warn{color:var(--warn);font-weight:600}.t-crit{color:var(--crit);font-weight:600}
+.note-cell{max-width:220px;font-size:.72rem;color:var(--muted);line-height:1.4}
+
+/* UPCOMING TABLE */
+.upcoming-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.ucard{background:var(--white);border-radius:12px;padding:14px 16px;border:1px solid var(--border)}
+.ucard.current{border-color:#7C3AED;border-width:1.5px}
+.ucard .u-wk{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+.ucard .u-dates{font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:8px}
+.ucard .u-km{font-size:1.2rem;font-weight:700;color:var(--navy)}
+.ucard .u-kmlbl{font-size:.67rem;color:var(--muted)}
+.session-row{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:.72rem}
+.day-dot{width:22px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;margin-top:1px}
+.d-run{background:#EFF6FF;color:#1D4ED8}
+.d-str{background:#FEF3C7;color:#92400E}
+.d-trk{background:#F3E8FF;color:#6B21A8}
+.d-mc{background:#FEE2E2;color:#991B1B}
+.d-lr{background:#DCFCE7;color:#14532D}
+.d-rst{background:#F1F5F9;color:#64748B}
+.flag{background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:5px 8px;font-size:.7rem;color:#92400E;margin-top:6px;display:flex;gap:5px;align-items:flex-start}
+
+/* PROJECTIONS */
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.proj-card{background:var(--white);border-radius:12px;padding:18px 20px;border:1px solid var(--border)}
+.proj-card h3{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.proj-card .sub{font-size:.72rem;color:var(--muted);margin-bottom:14px}
+.scenario-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F1F5F9}
+.scenario-row:last-child{border-bottom:none}
+.s-name{font-size:.75rem;font-weight:500;color:var(--slate)}
+.s-time{font-size:1rem;font-weight:700}
+.s-prob{font-size:.68rem;font-weight:500;padding:1px 6px;border-radius:6px}
+.dep-row{display:flex;gap:7px;align-items:flex-start;margin-top:7px;font-size:.72rem;color:var(--slate)}
+.dep-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+
+/* CURRENT WEEK HIGHLIGHT */
+.curr-badge{display:inline-block;background:#7C3AED;color:#fff;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+
+/* ALERT */
+.alert-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.alert-chip{border-radius:8px;padding:8px 12px;font-size:.75rem;flex:1;min-width:200px;display:flex;gap:7px;align-items:flex-start;border:1px solid}
+.a-good{background:#F0FDF4;border-color:#BBF7D0;color:#14532D}
+.a-warn{background:#FFF7ED;border-color:#FED7AA;color:#92400E}
+.a-info{background:#EFF6FF;border-color:#BFDBFE;color:#1D4ED8}
+
+@media(max-width:780px){
+  .summary-grid,.phase-grid{grid-template-columns:repeat(2,1fr)}
+  .proj-grid,.upcoming-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .phase-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
+<body>
 
-    <!-- Top Navigation / Header -->
-    <header class="border-b border-gray-800 bg-gray-950/50 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span class="text-emerald-500">⚡</span> Performance Log
-            </h1>
-            <div id="connection-status" class="text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                Connecting to Google Sheets...
-            </div>
-        </div>
-    </header>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>Christian Avendano — Hybrid Training Dashboard</h1>
+    <div class="sub" id="sync-timestamp">Connecting to live dataset...</div>
+  </div>
+  <div class="countdowns">
+    <div class="countdown-chip hyrox-chip">
+      <div class="days" id="days-to-hyrox">--</div>
+      <div class="label">days to HYROX</div>
+    </div>
+    <div class="countdown-chip">
+      <div class="days">1:34:00</div>
+      <div class="label">Hyrox goal</div>
+    </div>
+    <div class="countdown-chip mara-chip">
+      <div class="days" id="days-to-marathon">--</div>
+      <div class="label">days to marathon</div>
+    </div>
+    <div class="countdown-chip">
+      <div class="days">Sub 4:00</div>
+      <div class="label">marathon goal</div>
+    </div>
+  </div>
+</div>
 
-    <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
-        
-        <!-- ERROR BANNER (Hidden by default, reveals with diagnostics if fetch fails) -->
-        <div id="error-banner" class="hidden mb-8 p-4 bg-rose-950/40 border border-rose-900/50 rounded-xl text-rose-200">
-            <div class="flex items-start gap-3">
-                <span class="text-xl">⚠️</span>
-                <div>
-                    <h3 class="font-semibold text-rose-300 text-lg mb-1">Could not load data from Google Sheets</h3>
-                    <p id="error-detail" class="text-sm text-rose-400/90 leading-relaxed"></p>
-                </div>
-            </div>
-        </div>
+<div class="wrap">
 
-        <!-- DASHBOARD BODY PLACEHOLDER -->
-        <div id="dashboard-content" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Metric Card 1 -->
-            <div class="bg-gray-950/40 border border-gray-800 rounded-xl p-6">
-                <p class="text-sm font-medium text-gray-400">Total Recorded Sessions</p>
-                <p id="metric-total-rows" class="text-3xl font-bold text-white mt-2">--</p>
-            </div>
-            <!-- Add more metric cards or charts here -->
-        </div>
+<!-- DIAGNOSTIC ERROR ROUTER -->
+<div id="error-banner"></div>
 
-        <!-- DATA PREVIEW TABLE -->
-        <div class="bg-gray-950/40 border border-gray-800 rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-800 bg-gray-950/20">
-                <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Raw Data Stream Preview</h2>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm text-gray-300">
-                    <thead class="bg-gray-900/50 text-gray-400 border-b border-gray-800">
-                        <tr id="table-headers">
-                            <!-- Headers injected via JavaScript -->
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-gray-800/50">
-                        <tr>
-                            <td colspan="100%" class="px-6 py-12 text-center text-gray-500 italic">Waiting for data link initialization...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+<!-- ALERTS -->
+<div class="alert-row">
+  <div class="alert-chip a-good">✅ <div><strong>Z2 correction working</strong> — Both runs this week at HR 148–150 bpm. First true Z2 adherence in training block. Keep the pace at 6:20–6:35/km on easy days.</div></div>
+  <div class="alert-chip a-warn">⚠️ <div><strong>Week 2 long run still unrecovered</strong> — 18km LR missed entirely. Cumulative volume is on track, but long run consistency is critical. Don't miss another before Week 6 deload.</div></div>
+  <div class="alert-chip a-info">📅 <div><strong>Week 6 deload incoming (Jun 29)</strong> — Light S+C only. No stations. Long run caps at 14.5km. Use this to consolidate the Phase 1 aerobic work.</div></div>
+</div>
 
-    <!-- CONFIGURATION & APP LOGIC -->
-    <script>
-        // 1. Core Spreadsheet Identifiers
-        const SHEET_ID = '2PACX-1vSl2265IKCYyPylFPX1eSS0NvDEq6Rw3IdIY4iS2ZEXAoGgbZoe9p5TRLzZ-FDRCq5EbziGQk_C7G8I';
-        const GID = '422384441'; // Your specific tab ID
+<!-- SUMMARY CARDS -->
+<div class="summary-grid">
+  <div class="scard">
+    <div class="lbl">Total km completed</div>
+    <div class="val" id="card-total-km">--</div>
+    <div class="sub">of <span id="card-planned-total">880.7</span>km planned</div>
+    <span class="badge bg" id="card-volume-pct">--% done</span>
+  </div>
+  <div class="scard">
+    <div class="lbl">Avg weekly adherence</div>
+    <div class="val" id="card-adherence">--%</div>
+    <div class="sub">Cumulative data stream</div>
+    <span class="badge bg" id="card-adherence-status">Calculating</span>
+  </div>
+  <div class="scard">
+    <div class="lbl">Long run adherence</div>
+    <div class="val">69%</div>
+    <div class="sub">3 of 4 LRs completed</div>
+    <span class="badge bw">Week 2 missed</span>
+  </div>
+  <div class="scard">
+    <div class="lbl">Phase 1 completion</div>
+    <div class="val" id="card-p1-completion">--%</div>
+    <div class="sub"><span id="card-p1-weeks">0</span> of 6 weeks done</div>
+    <span class="badge bg" id="card-p1-status">Processing</span>
+  </div>
+</div>
 
-        // 2. Fetch CSV Stream securely with diagnostic routing
-        async function fetchCSV(gid) {
-            let url;
-            const cleanID = SHEET_ID.trim();
-            
-            if (cleanID.startsWith('2PACX-')) {
-                url = `https://docs.google.com/spreadsheets/d/e/${cleanID}/pub?output=csv&gid=${gid}`;
-            } else {
-                url = `https://docs.google.com/spreadsheets/d/${cleanID}/export?format=csv&gid=${gid}`;
-            }
+<!-- VOLUME CHART -->
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">Weekly Running Volume — All 21 Weeks</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#1D6FA8"></div>Actual (completed)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#93C5FD"></div>Planned</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FCD34D"></div>Deload weeks</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FCA5A5"></div>Race weeks</div>
+    </div>
+  </div>
+  <div style="position:relative;height:280px">
+    <canvas id="volChart" role="img" aria-label="Weekly volume chart showing planned vs actual km for all 21 weeks"></canvas>
+  </div>
+</div>
 
-            try {
-                const res = await fetch(url, { cache: 'no-store' });
-                if (!res.ok) throw new Error(`HTTP Error Status ${res.status}`);
-                const text = await res.text();
-                
-                // Block if Google serves a standard web/login page layout instead of pure CSV strings
-                if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-                    throw new Error('Google Sheets returned an HTML login page instead of raw CSV data.');
-                }
-                return parseCSV(text);
-            } catch (err) {
-                updateConnectionStatus('Connection Failed', 'danger');
-                
-                const errorBanner = document.getElementById('error-banner');
-                const errorDetail = document.getElementById('error-detail');
-                if (errorBanner && errorDetail) {
-                    errorDetail.innerHTML = `
-                        ${err.message}<br><br>
-                        <strong>Diagnostic Step:</strong> <a href="${url}" target="_blank" class="text-rose-400 font-semibold underline hover:text-rose-300 transition">Click here to manually check your direct data link</a>. 
-                        If this link downloads a clean CSV file but the page fails, your browser environment is blocking programmatic scripts. Uploading this file to GitHub Pages will automatically resolve this.
-                    `;
-                    errorBanner.style.display = 'block';
-                }
-                throw err;
-            }
+<!-- PHASE PROGRESS -->
+<div class="sec-title">Phase Progress</div>
+<div class="phase-grid">
+  <div class="pcard p1c">
+    <h3 style="color:var(--p1)">Phase 1 — Aerobic Build</h3>
+    <div class="dates">May 25 – Jul 5 · Weeks 1–6</div>
+    <div class="km-row"><span>Completed</span><span class="km-val" style="color:var(--p1)" id="p1-comp-km">0 km</span></div>
+    <div class="km-row"><span>Remaining</span><span class="km-val" id="p1-rem-km">-- km</span></div>
+    <div class="km-row"><span>Phase total</span><span class="km-val">257.8 km</span></div>
+    <div class="progress-bar" style="margin-top:8px">
+      <div class="progress-fill" id="p1-bar-fill" style="width:0%;background:var(--p1)"></div>
+    </div>
+    <span class="status" id="p1-status-badge" style="background:var(--p1bg);color:var(--p1)">Updating...</span>
+  </div>
+  <div class="pcard p2c">
+    <h3 style="color:var(--p2)">Phase 2 — Hybrid Build</h3>
+    <div class="dates">Jul 6 – Aug 30 · Weeks 7–14</div>
+    <div class="km-row"><span>Completed</span><span class="km-val">0 km</span></div>
+    <div class="km-row"><span>Planned</span><span class="km-val">405.0 km</span></div>
+    <div class="km-row">
+      <span style="color:var(--warn);font-size:.7rem">⚠️ MC sessions Wks 7 + 14 (Fri)</span>
+    </div>
+    <div class="progress-bar" style="margin-top:8px">
+      <div class="progress-fill" style="width:0%;background:var(--p2)"></div>
+    </div>
+    <span class="status" style="background:var(--p2bg);color:var(--p2)">Starts Jul 6</span>
+  </div>
+  <div class="pcard p3c">
+    <h3 style="color:var(--p3)">Phase 3 — HYROX Peak</h3>
+    <div class="dates">Aug 31 – Oct 4 · Weeks 15–19</div>
+    <div class="km-row"><span>Completed</span><span class="km-val">0 km</span></div>
+    <div class="km-row"><span>Planned</span><span class="km-val">187.8 km</span></div>
+    <div class="km-row"><span style="font-size:.7rem;color:var(--crit)">🏋️ Race sims + full HYROX sim</span></div>
+    <div class="progress-bar" style="margin-top:8px">
+      <div class="progress-fill" style="width:0%;background:var(--p3)"></div>
+    </div>
+    <span class="status" style="background:var(--p3bg);color:var(--p3)">Starts Aug 31</span>
+  </div>
+  <div class="pcard p4c">
+    <h3 style="color:var(--p4)">Phase 4 — Recovery Taper</h3>
+    <div class="dates">Oct 5–18 · Weeks 20–21</div>
+    <div class="km-row"><span>Planned</span><span class="km-val">33.0 km</span></div>
+    <div class="km-row"><span style="font-size:.7rem;color:var(--good)">Day 8 confidence run (Oct 12)</span></div>
+    <div class="km-row"><span style="font-size:.7rem">Sauna · Cold · Physio · Massage</span></div>
+    <div class="progress-bar" style="margin-top:8px">
+      <div class="progress-fill" style="width:0%;background:var(--p4)"></div>
+    </div>
+    <span class="status" style="background:var(--p4bg);color:var(--p4)">Starts Oct 5</span>
+  </div>
+</div>
+
+<!-- COMPLETED WEEKS TABLE -->
+<div class="sec-title">Completed Weeks — Detail</div>
+<div class="table-card">
+<table>
+  <thead>
+    <tr>
+      <th>Week</th><th>Dates</th><th>Phase</th>
+      <th>Planned km</th><th>Actual km</th><th>Adherence</th>
+      <th>Long Run</th><th>Track</th><th>Key notes</th>
+    </tr>
+  </thead>
+  <tbody id="live-table-body">
+    <tr>
+      <td colspan="9" style="padding:24px; text-align:center; color:var(--muted); font-style:italic;">
+        Querying production Google Sheet data stream...
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- UPCOMING WEEKS -->
+<div class="sec-title">Upcoming Weeks — Key Sessions</div>
+<div class="upcoming-grid">
+  <div class="ucard current">
+    <div class="u-wk">Week 5 — Current</div>
+    <div class="u-dates">Jun 22–28</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">39.3</span><span class="u-kmlbl">km target</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-str">M</span><span>Upper body strength (done)</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>Lower body + sled push (done)</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
+    <div class="session-row"><span class="day-dot d-trk">F</span><span>Track 5km (Z4–Z5)</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Long Run 19.3km + 50 WB</span></div>
+  </div>
+  <div class="ucard">
+    <div class="u-wk">Week 6 — Deload</div>
+    <div class="u-dates">Jun 29 – Jul 5</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">39.3</span><span class="u-kmlbl">km target</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 4.8km Z2 — HR &lt;135</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>Light S+C only — NO stations</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
+    <div class="session-row"><span class="day-dot d-trk">F</span><span>Track 4×400m @4:35/km (short)</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>LR 14.5km Z2 — no finishers</span></div>
+    <div class="flag">⚠️ Deload: reduce intensity. No stations. No wall balls. Physio if needed.</div>
+  </div>
+  <div class="ucard">
+    <div class="u-wk">Week 7 — Phase 2 Begins</div>
+    <div class="u-dates">Jul 6–12</div>
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px">
+      <span class="u-km">54.9</span><span class="u-kmlbl">km target (+40% vs Wk 6)</span>
+    </div>
+    <div class="session-row"><span class="day-dot d-run">M</span><span>Easy 6.4km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-str">T</span><span>P2 Stations: SkiErg 2×1000m, Sled 4×25m</span></div>
+    <div class="session-row"><span class="day-dot d-run">W</span><span>Easy 10km Z2</span></div>
+    <div class="session-row"><span class="day-dot d-rst">Th</span><span>Rest</span></div>
+    <div class="session-row"><span class="day-dot d-mc">F</span><span>★ Mental Compromise: AM 6km @4:50 / PM 1km+station ×5</span></div>
+    <div class="session-row"><span class="day-dot d-run">Sa</span><span>Easy 5km Z2 (shakeout)</span></div>
+    <div class="session-row"><span class="day-dot d-lr">Su</span><span>Speed trial: ~21km @5:30/km</span></div>
+    <div class="flag">⚠️ Volume jumps +40% from deload. Cap at 50km if Achilles stiffness appears.</div>
+  </div>
+</div>
+
+<!-- PROJECTIONS -->
+<div class="sec-title">Race Projections — October 2026</div>
+<div class="proj-grid">
+  <div class="proj-card">
+    <h3>🏋️ HYROX Toronto — Oct 1–4</h3>
+    <div class="sub">Based on Ottawa 1:43:34 · Goal 1:34:00 · Gap: 9:34 needed</div>
+    <div class="scenario-row">
+      <span class="s-name">Optimistic</span>
+      <span class="s-time" style="color:var(--good)">1:33:00</span>
+      <span class="s-prob" style="background:#DCFCE7;color:#14532D">~30%</span>
+    </div>
+    <div class="scenario-row" style="background:#F8FAFF;border-radius:6px;padding:7px 6px">
+      <span class="s-name" style="font-weight:600">Realistic</span>
+      <span class="s-time" style="color:var(--p1)">1:35:30</span>
+      <span class="s-prob" style="background:#EFF6FF;color:#1D4ED8">~55%</span>
+    </div>
+    <div class="scenario-row">
+      <span class="s-name">Conservative</span>
+      <span class="s-time" style="color:var(--warn)">1:39:00</span>
+      <span class="s-prob" style="background:#FEF3C7;color:#92400E">~15%</span>
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px">Key dependencies</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--crit)"></div>Stations: need 4–5 min saved vs Ottawa (current top 89.5% weakness)</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--warn)"></div>Running: 5:15–5:25/km target (was 5:51/km in Ottawa)</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--good)"></div>Wall balls: 100 unbroken by Week 15 is the gating milestone</div>
+  </div>
+  <div class="proj-card">
+    <h3>🏃 TCS Waterfront Marathon — Oct 18</h3>
+    <div class="sub">Based on half 1:59:28 · Sep race sim 5:47/km · Post-Hyrox window: 14–17 days</div>
+    <div class="scenario-row">
+      <span class="s-name">Stretch (sub-4)</span>
+      <span class="s-time" style="color:var(--good)">3:57–4:02</span>
+      <span class="s-prob" style="background:#DCFCE7;color:#14532D">~20%</span>
+    </div>
+    <div class="scenario-row" style="background:#F8FAFF;border-radius:6px;padding:7px 6px">
+      <span class="s-name" style="font-weight:600">Realistic</span>
+      <span class="s-time" style="color:var(--p1)">4:10–4:20</span>
+      <span class="s-prob" style="background:#EFF6FF;color:#1D4ED8">~60%</span>
+    </div>
+    <div class="scenario-row">
+      <span class="s-name">Conservative</span>
+      <span class="s-time" style="color:var(--warn)">4:25–4:35</span>
+      <span class="s-prob" style="background:#FEF3C7;color:#92400E">~20%</span>
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px">Key dependencies</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--crit)"></div>Post-Hyrox eccentric damage (sled, lunges, BBJ) — Phase 4 recovery quality</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--warn)"></div>Oct 12 confidence run: if 3km at 5:41/km feels easy → sub-4 is live</div>
+    <div class="dep-row"><div class="dep-dot" style="background:var(--good)"></div>LR MP progression (32km with 14km @MP by Week 13) — fitness is there</div>
+  </div>
+</div>
+
+<!-- KPI SNAPSHOT -->
+<div class="sec-title">Current KPI Snapshot</div>
+<div class="table-card">
+<table>
+  <thead>
+    <tr><th>KPI</th><th>Current</th><th>Phase 2 target</th><th>Race-ready target</th><th>Trend</th><th>Source</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Aerobic Decoupling</strong></td>
+      <td><span class="t-warn">~7–10%</span> (outdoor LRs)</td>
+      <td>&lt; 7%</td><td>&lt; 5%</td>
+      <td>↗ Improving (tonight: ~3% treadmill)</td>
+      <td>Manual (long runs)</td>
+    </tr>
+    <tr>
+      <td><strong>Efficiency Factor</strong></td>
+      <td><span class="t-warn">1.09</span> (tonight, 1% incline)</td>
+      <td>1.18</td><td>1.25+</td>
+      <td>→ Baseline established</td>
+      <td>Manual calc</td>
+    </tr>
+    <tr>
+      <td><strong>Pace at Z2 ceiling</strong></td>
+      <td><span class="t-warn">~6:05/km</span> at HR 154</td>
+      <td>5:50/km</td><td>5:38/km</td>
+      <td>→ Too early to trend</td>
+      <td>Monthly flat run</td>
+    </tr>
+    <tr>
+      <td><strong>Z2 Adherence Rate</strong></td>
+      <td><span class="t-good">100%</span> this week (148–150 bpm)</td>
+      <td>&gt; 85%</td><td>&gt; 85%</td>
+      <td>↗ Big improvement (was ~30%)</td>
+      <td>Garmin / Manual</td>
+    </tr>
+    <tr>
+      <td><strong>Cadence at Z2</strong></td>
+      <td><span class="t-warn">166–172 spm</span></td>
+      <td>172–176 spm</td><td>174–178 spm</td>
+      <td>↗ 172 spm outdoor (Week 4)</td>
+      <td>Garmin auto</td>
+    </tr>
+    <tr>
+      <td><strong>Vertical Oscillation Ratio</strong></td>
+      <td><span class="t-good">9.2%</span> (tonight)</td>
+      <td>&lt; 9.0%</td><td>&lt; 8.5%</td>
+      <td>→ Solid baseline</td>
+      <td>Garmin auto</td>
+    </tr>
+    <tr>
+      <td><strong>Ground Contact Time</strong></td>
+      <td><span class="t-warn">269ms</span> (Z2 pace)</td>
+      <td>&lt; 260ms</td><td>&lt; 250ms at MP</td>
+      <td>→ Baseline, will improve with fitness</td>
+      <td>Garmin auto</td>
+    </tr>
+    <tr>
+      <td><strong>Morning Achilles Stiffness</strong></td>
+      <td><span class="t-good">0–1 / 10</span></td>
+      <td>Stay 0–1</td><td>Stay 0–1</td>
+      <td>✓ Prehab working</td>
+      <td>Daily self-report</td>
+    </tr>
+    <tr>
+      <td><strong>Weekly Volume Adherence</strong></td>
+      <td><span class="t-good">100%</span> cumulative Wks 1–4</td>
+      <td>&gt; 85%</td><td>&gt; 85%</td>
+      <td>→ On track overall</td>
+      <td>Garmin / Manual</td>
+    </tr>
+    <tr>
+      <td><strong>Wall Ball Unbroken Max</strong></td>
+      <td><span class="t-warn">~40 est.</span></td>
+      <td>75 (Wk 8)</td><td>100 (Wk 11+)</td>
+      <td>→ First formal test Sun Week 5</td>
+      <td>Manual log (Sunday LR)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div><!-- end wrap -->
+
+<script>
+// ==========================================
+// 1. DATASTREAM MANAGEMENT CONFIGURATION
+// ==========================================
+const SHEET_ID = '2PACX-1vSl2265IKCYyPylFPX1eSS0NvDEq6Rw3IdIY4iS2ZEXAoGgbZoe9p5TRLzZ-FDRCq5EbziGQk_C7G8I';
+const GID = '422384441';
+
+// Static targets defined by training blueprint
+const plannedVolumes = [43.9,47.8,38.8,44.7,39.3,39.3,54.9,50.4,57.6,47.4,48.1,31,60.3,55.4,55.2,49.3,47.3,37,0,9,24];
+const deloadWeeks = [3,6,9,12,18];
+const raceWeeks = [19];
+
+let volChartInstance = null;
+
+// ==========================================
+// 2. RUNTIME ENGINE INITIALIZATION
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+  calculateCountdowns();
+  initializeEmptyChart();
+  executeDataPipeline();
+});
+
+// Calculate true chronological countdowns relative to current execution date
+function calculateCountdowns() {
+  const today = new Date();
+  
+  // Target Event Configurations (October 2026)
+  const hyroxDate = new Date('2026-10-03T00:00:00'); // Targeted competition Saturday
+  const marathonDate = new Date('2026-10-18T00:00:00'); // Official Event Window
+  
+  const diffHyrox = hyroxDate - today;
+  const diffMara = marathonDate - today;
+  
+  document.getElementById('days-to-hyrox').innerText = Math.max(0, Math.ceil(diffHyrox / (1000 * 60 * 60 * 24)));
+  document.getElementById('days-to-marathon').innerText = Math.max(0, Math.ceil(diffMara / (1000 * 60 * 60 * 24)));
+}
+
+// Instantiate the visual wrapper shell for Chart.JS
+function initializeEmptyChart() {
+  const weeks = Array.from({length:21},(_,i)=>i+1);
+  const barColors = weeks.map(w => {
+    if(raceWeeks.includes(w)) return 'rgba(252,165,165,0.7)';
+    if(deloadWeeks.includes(w)) return 'rgba(253,211,77,0.7)';
+    if(w<=6) return 'rgba(147,197,253,0.8)';
+    if(w<=14) return 'rgba(253,186,116,0.8)';
+    if(w<=19) return 'rgba(252,165,165,0.8)';
+    return 'rgba(134,239,172,0.8)';
+  });
+
+  const ctx = document.getElementById('volChart').getContext('2d');
+  volChartInstance = new Chart(ctx, {
+    data: {
+      labels: weeks.map(w=>`Wk ${w}`),
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Actual km',
+          data: Array(21).fill(null), // Populate dynamically later
+          backgroundColor: '#1D6FA8',
+          borderRadius: 3,
+          order: 1,
+        },
+        {
+          type: 'bar',
+          label: 'Planned km',
+          data: plannedVolumes,
+          backgroundColor: barColors,
+          borderRadius: 3,
+          order: 2,
+        },
+        {
+          type: 'line',
+          label: 'Planned (trend)',
+          data: plannedVolumes,
+          borderColor: 'rgba(100,116,139,0.4)',
+          borderWidth: 1.5,
+          borderDash: [4,3],
+          pointRadius: 0,
+          fill: false,
+          order: 0,
         }
-
-        // 3. Robust RFC-compliant CSV Parser
-        function parseCSV(text) {
-            const lines = [];
-            let row = [""];
-            let inQuotes = false;
-
-            for (let i = 0; i < text.length; i++) {
-                const c = text[i];
-                const next = text[i+1];
-
-                if (c === '"') {
-                    if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
-                    else { inQuotes = !inQuotes; }
-                } else if (c === ',' && !inQuotes) {
-                    row.push('');
-                } else if ((c === '\r' || c === '\n') && !inQuotes) {
-                    if (c === '\r' && next === '\n') { i++; }
-                    lines.push(row);
-                    row = [''];
-                } else {
-                    row[row.length - 1] += c;
-                }
-            }
-            if (row.length > 1 || row[0] !== '') lines.push(row);
-            return lines;
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            afterTitle: (items) => {
+              const w = items[0].dataIndex + 1;
+              const specialLabels = {3:'Deload',6:'Deload',9:'Deload',12:'Deload (Vacation)',18:'Taper',19:'HYROX RACE',21:'Marathon'};
+              return specialLabels[w] ? `(${specialLabels[w]})` : '';
+            },
+            label: (ctx) => ctx.raw ? `${Number(ctx.raw).toFixed(1)} km` : '—'
+          }
         }
+      },
+      scales: {
+        x: { ticks: { color:'#888', font:{ size:9 } }, grid: { display: false } },
+        y: { ticks: { color:'#888', font:{ size:9 } }, grid: { color:'rgba(128,128,128,0.1)' }, title: { display:true, text:'km', color:'#888', font:{size:10} } }
+      }
+    }
+  });
+}
 
-        // 4. Update the UI Connection Pill
-        function updateConnectionStatus(message, type) {
-            const statusEl = document.getElementById('connection-status');
-            if (!statusEl) return;
-            statusEl.innerText = message;
-            statusEl.className = "text-xs font-medium px-2.5 py-1 rounded-full ";
-            
-            if (type === 'success') {
-                statusEl.className += "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-            } else if (type === 'danger') {
-                statusEl.className += "bg-rose-500/10 text-rose-400 border border-rose-500/20";
-            } else {
-                statusEl.className += "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
-            }
-        }
+// Async Data orchestrator
+async function executeDataPipeline() {
+  const cleanID = SHEET_ID.trim();
+  const url = `https://docs.google.com/spreadsheets/d/e/${cleanID}/pub?output=csv&gid=${GID}`;
 
-        // 5. Render Data to the UI Elements
-        function renderDashboard(data) {
-            if (!data || data.length === 0) return;
-            
-            const headers = data[0];
-            const rows = data.slice(1).filter(r => r.join('').trim() !== ''); // Exclude blank lines
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Network Stream Fault Status: ${res.status}`);
+    const text = await res.text();
+    
+    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+      throw new Error('Google identity wall intercepted dataset request.');
+    }
 
-            // Update Metrics Dashboard Summary
-            document.getElementById('metric-total-rows').innerText = rows.length;
-            document.getElementById('dashboard-content').style.display = 'grid';
+    const parsedRows = parseCSVStream(text);
+    processAndRenderMetrics(parsedRows);
 
-            // Populate Table Headers
-            const headerRow = document.getElementById('table-headers');
-            headerRow.innerHTML = headers.map(h => `<th class="px-6 py-3 font-semibold">${h}</th>`).join('');
+  } catch (err) {
+    console.error("Pipeline Failure: ", err);
+    const banner = document.getElementById('error-banner');
+    if (banner) {
+      banner.innerHTML = `<strong>⚠️ Integration Interrupted:</strong> ${err.message}<br>
+      <em>Resolution:</em> Ensure updates are compiled via Cloud sync. Your secure link structure can be tested natively here: 
+      <a href="${url}" target="_blank" style="text-decoration:underline; font-weight:600; color:#9F1239;">Direct CSV Stream</a>.`;
+      banner.style.display = 'block';
+    }
+  }
+}
 
-            // Populate Table Rows (Limit preview window to top 15 records for crisp performance)
-            const tableBody = document.getElementById('table-body');
-            const displayRows = rows.slice(0, 15);
-            
-            tableBody.innerHTML = displayRows.map(row => `
-                <tr class="hover:bg-gray-800/20 transition duration-150">
-                    ${row.map(cell => `<td class="px-6 py-4 white-space-nowrap text-gray-300 max-w-xs truncate">${cell}</td>`).join('')}
-                </tr>
-            `).join('');
+// RFC-Compliant String tokenizer for CSV streams
+function parseCSVStream(text) {
+  const lines = [];
+  let row = [""];
+  let inQuotes = false;
 
-            updateConnectionStatus('Data Synchronized', 'success');
-        }
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const next = text[i+1];
 
-        // 6. Application Entry Initialization Engine
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchCSV(GID)
-                .then(parsedData => {
-                    renderDashboard(parsedData);
-                })
-                .catch(err => {
-                    console.error('Dashboard Engine Error:', err);
-                });
-        });
-    </script>
+    if (c === '"') {
+      if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (c === ',' && !inQuotes) {
+      row.push('');
+    } else if ((c === '\r' || c === '\n') && !inQuotes) {
+      if (c === '\r' && next === '\n') { i++; }
+      lines.push(row);
+      row = [''];
+    } else {
+      row[row.length - 1] += c;
+    }
+  }
+  if (row.length > 1 || row[0] !== '') lines.push(row);
+  return lines;
+}
+
+// ==========================================
+// 3. UI GENERATION & DATA BINDING ENGINE
+// ==========================================
+function processAndRenderMetrics(rows) {
+  // Discard column headers if present
+  if (rows[0][0].toLowerCase().includes("week")) {
+    rows = rows.slice(1);
+  }
+
+  // Sanitize structure and remove blank entries
+  const validWeeks = rows.filter(r => r.length >= 5 && r[0].trim() !== "");
+  
+  let dynamicActuals = Array(21).fill(null);
+  let totalKmCompleted = 0;
+  let totalPlannedAccumulator = 0;
+  let runningAdherenceAccumulator = 0;
+  let countedAdherenceWeeks = 0;
+  let p1CompletedKm = 0;
+  let p1CompletedWeeksCount = 0;
+
+  let tableHtml = "";
+
+  validWeeks.forEach((row) => {
+    // Expected Layout Array Map:
+    // [0]: WeekNum, [1]: Dates, [2]: Phase, [3]: PlannedKm, [4]: ActualKm, [5]: Adherence, [6]: LongRun, [7]: Track, [8]: Notes
+    const wkIdx = parseInt(row[0]) - 1;
+    const dateStr = row[1] || "";
+    const phaseStr = row[2] || "";
+    const plannedKm = parseFloat(row[3]) || 0;
+    const actualRaw = row[4] ? row[4].replace(/[~+]/g, '').trim() : "";
+    const actualKm = parseFloat(actualRaw) || 0;
+    const adherenceStr = row[5] || "";
+    const lrStr = row[6] || "";
+    const trackStr = row[7] || "";
+    const notesStr = row[8] || "";
+
+    const isCurrentWeek = adherenceStr.toLowerCase().includes("progress");
+
+    if (wkIdx >= 0 && wkIdx < 21) {
+      if (!isCurrentWeek && row[4] !== null && row[4] !== "") {
+        dynamicActuals[wkIdx] = actualKm;
+        totalKmCompleted += actualKm;
+      } else if (isCurrentWeek) {
+        dynamicActuals[wkIdx] = actualKm; // Show in progress data points on chart
+        totalKmCompleted += actualKm;
+      }
+    }
+
+    // Accumulate total metrics
+    totalPlannedAccumulator += plannedKm;
+
+    // Track Phase 1 specifics (Weeks 1 to 6)
+    if ((wkIdx + 1) <= 6) {
+      p1CompletedKm += actualKm;
+      if (!isCurrentWeek && actualKm > 0) p1CompletedWeeksCount++;
+    }
+
+    // Process adherence status
+    if (!isCurrentWeek && adherenceStr) {
+      const parsedAdh = parseFloat(adherenceStr.replace('%', ''));
+      if (!isNaN(parsedAdh)) {
+        runningAdherenceAccumulator += parsedAdh;
+        countedAdherenceWeeks++;
+      }
+    }
+
+    // Generate Dynamic Style Tags
+    let phaseClass = "t-p1";
+    if (phaseStr.toLowerCase().includes("deload")) phaseClass = "t-dl";
+    else if (phaseStr.toLowerCase().includes("phase 2")) phaseClass = "t-p2";
+
+    let adherenceClass = "t-good";
+    if (isCurrentWeek) adherenceClass = "";
+    else if (adherenceStr.includes("71%")) adherenceClass = "t-warn"; // Explicit highlighting preserved
+
+    let lrClass = "t-good";
+    if (lrStr.includes("✗") || lrStr.startsWith("0 /")) lrClass = "t-crit";
+    else if (lrStr.includes("/") && parseFloat(lrStr.split('/')[0]) < parseFloat(lrStr.split('/')[1])) lrClass = "t-warn";
+
+    // Build Table Row Template String
+    tableHtml += `
+      <tr>
+        <td><span class="week-num">${wkIdx + 1} ${isCurrentWeek ? '<span class="curr-badge">NOW</span>' : ''}</span></td>
+        <td>${dateStr}</td>
+        <td><span class="phase-tag ${phaseClass}">${phaseStr}</span></td>
+        <td>${plannedKm.toFixed(1)}</td>
+        <td><strong>${row[4] || '0'}</strong></td>
+        <td>
+          <div class="adh-bar">
+            <div class="adh-track">
+              <div class="adh-fill" style="width: ${isCurrentWeek ? '38%' : (parseFloat(adherenceStr) || 100).toFixed(0)}%; background:${isCurrentWeek ? '#7C3AED' : (adherenceClass === 't-warn' ? '#D97706' : '#15803D')}"></div>
+            </div>
+            <span class="${adherenceClass}" style="${isCurrentWeek ? 'color:#7C3AED; font-weight:600' : ''}">${adherenceStr}</span>
+          </div>
+        </td>
+        <td><span class="${lrClass}">${lrStr}</span></td>
+        <td><span class="t-good">${trackStr}</span></td>
+        <td class="note-cell">${notesStr}</td>
+      </tr>
+    `;
+  });
+
+  // Inject computed array directly to Chart.JS dataset wrapper
+  volChartInstance.data.datasets[0].data = dynamicActuals;
+  volChartInstance.update();
+
+  // Populate Summary Elements
+  document.getElementById('live-table-body').innerHTML = tableHtml;
+  document.getElementById('card-total-km').innerText = totalKmCompleted.toFixed(1);
+  
+  const overallPlanned = 880.7; 
+  document.getElementById('card-volume-pct').innerText = `${((totalKmCompleted / overallPlanned) * 100).toFixed(1)}% done`;
+
+  if (countedAdherenceWeeks > 0) {
+    const avgAdherence = Math.round(runningAdherenceAccumulator / countedAdherenceWeeks);
+    document.getElementById('card-adherence').innerText = `${avgAdherence}%`;
+    document.getElementById('card-adherence-status').innerText = avgAdherence >= 90 ? "On track" : "Review Required";
+  }
+
+  // Phase 1 Computations
+  const p1TotalTarget = 257.8;
+  const p1Pct = Math.round((p1CompletedWeeksCount / 6) * 100);
+  document.getElementById('card-p1-completion').innerText = `${p1Pct}%`;
+  document.getElementById('card-p1-weeks').innerText = p1CompletedWeeksCount;
+  document.getElementById('card-p1-status').innerText = p1Pct >= 100 ? "Completed" : "In Progress";
+  
+  document.getElementById('p1-comp-km').innerText = `${p1CompletedKm.toFixed(1)} km`;
+  document.getElementById('p1-rem-km').innerText = `${Math.max(0, p1TotalTarget - p1CompletedKm).toFixed(1)} km`;
+  document.getElementById('p1-bar-fill').style.width = `${Math.min(100, (p1CompletedKm / p1TotalTarget) * 100)}%`;
+  document.getElementById('p1-status-badge').innerText = `Active: Week ${p1CompletedWeeksCount + 1} of 6`;
+
+  // Update System Metadata
+  const dateOptions = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+  document.getElementById('sync-timestamp').innerText = `Live Sync Active · Document Query Connected: ${new Date().toLocaleDateString('en-US', dateOptions)}`;
+}
+</script>
 </body>
 </html>
